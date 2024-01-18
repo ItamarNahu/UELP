@@ -33,7 +33,7 @@ class Database_comm:
 
         self.conn.commit()
 
-    def _checkUser(self, username):
+    def _checkUser(self, username: str) -> bool:
         """
         function checks if username exists in USERS table
         :param username: username gotten from user
@@ -43,7 +43,7 @@ class Database_comm:
         self.curr.execute("SELECT username FROM " + self.loginTableName + " WHERE username = ?", (username,))
         return self.curr.fetchone() is not None
 
-    def addUser(self, username, password):
+    def addUser(self, username: str, password: str) -> bool:
         """
         function adds username and hashed password to USERS table if the username does not already exist
         :param username: username to add to USERS
@@ -59,7 +59,7 @@ class Database_comm:
             return True
         return False
 
-    def checkPassword(self, username, password):
+    def checkPassword(self, username: str, password: str) -> bool:
         """
         function checks if usernames password gotten exists in table
         :param username: username to check in USERS
@@ -67,14 +67,13 @@ class Database_comm:
         :return: True if password of username gotten exists for username in USERS
          and False if username or password don't exist in USERS
         """
-
         if len(username) < 26 and self._checkUser(username):
             self.curr.execute("SELECT password FROM " + self.loginTableName + " WHERE username = ? and password = ?",
                               (username, AES_hash_cipher.hash(password)))
             return self.curr.fetchone() is not None
         return False
 
-    def macExists(self, mac):
+    def macExists(self, mac: str) -> bool:
         """
         function checks if mac gotten exists in MACS table
         :param mac: mac to check if it's hash exists in MACS
@@ -84,7 +83,7 @@ class Database_comm:
         self.curr.execute("SELECT mac FROM " + self.blacklistTableName + " WHERE mac = ?", (AES_hash_cipher.hash(mac),))
         return self.curr.fetchone() is not None
 
-    def addBlackMac(self, mac):
+    def addBlackMac(self, mac: str) -> bool:
         """
         function checks if mac gotten exists in MACS and if dosen't adds it's hash
         :param mac: mac to add to MACS table
