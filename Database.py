@@ -69,9 +69,9 @@ class Database_comm:
         """
 
         if len(username) < 26 and self._checkUser(username):
-            self.curr.execute("SELECT password FROM " + self.loginTableName + " WHERE username = ?", (username,))
-            password_in_tb = self.curr.fetchone()
-            return password_in_tb == AES_hash_cipher.hash(password)
+            self.curr.execute("SELECT password FROM " + self.loginTableName + " WHERE username = ? and password = ?",
+                              (username, AES_hash_cipher.hash(password)))
+            return self.curr.fetchone() is not None
         return False
 
     def macExists(self, mac):
@@ -93,7 +93,7 @@ class Database_comm:
 
         if not self.macExists(mac):
             self.curr.execute("INSERT INTO " + self.blacklistTableName + " (mac) VALUES (?)",
-                              (AES_hash_cipher.hash(mac)))
+                              (AES_hash_cipher.hash(mac),))
             self.conn.commit()
             return True
         return False
