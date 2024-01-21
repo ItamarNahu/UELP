@@ -1,4 +1,3 @@
-
 def unpackData(data: str) -> str and list:
     """
     function gets data and unpacks it based on known opcodes and params protocols
@@ -9,25 +8,14 @@ def unpackData(data: str) -> str and list:
     opcode = data[:2]
     params = []
 
-    if opcode == "06":
-        params.append(data[2:])
-    elif opcode == "00" or opcode == "01":
+    if opcode == "00" or opcode == "01":
         username_len = int(data[2])
         params.append(data[3:3 + username_len])
         params.append(data[3 + username_len:])
-    elif opcode == "02" or opcode == "04":
+    elif opcode == "02" or opcode == "04" or opcode == "06":
         params.append(data[2:])
 
     return opcode, params
-
-
-def pack_public_key(publicKey: str) -> str:
-    """
-    function packs public key based on the protocol
-    :param publicKey: public key to send
-    :return: packed data based on protocol
-    """
-    return "99" + publicKey
 
 
 def pack_login_ans(authorized: bool) -> str:

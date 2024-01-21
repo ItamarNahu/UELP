@@ -17,15 +17,6 @@ def unpackData(data: str) -> str and list:
     return opcode, params
 
 
-def pack_shared_key(sharedKey: str) -> str:
-    """
-    function packs shared key based on the protocol
-    :param sharedKey: shared key to send
-    :return: packed data based on protocol
-    """
-    return "99" + sharedKey
-
-
 def pack_mac_addr(macAddr: str) -> str:
     """
     function packs mac address based on the protocol
