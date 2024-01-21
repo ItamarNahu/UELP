@@ -5,7 +5,7 @@ import secrets
 import base64
 from AsymmetricEncryption import RSA_cipher
 from SymmetricEncryption import AES_hash_cipher
-import queue
+
 
 class Client_comm:
     def __init__(self, serverIP: str, port: int, recv_q):

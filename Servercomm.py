@@ -3,7 +3,6 @@ import select
 import threading
 from AsymmetricEncryption import RSA_cipher
 from SymmetricEncryption import AES_hash_cipher
-import queue
 
 class Server_comm:
 
