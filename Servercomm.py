@@ -4,14 +4,15 @@ import threading
 from AsymmetricEncryption import RSA_cipher
 from SymmetricEncryption import AES_hash_cipher
 
+
 class Server_comm:
 
-    def __init__(self, recv_q, port: int, bindIP: str):
+    def __init__(self, recv_q, port: int, bindIP: str = None):
         """
         builder method creates a new "Server_comm" object with a Queue, port and bindIP
         :param recv_q: Queue for messages to the logic
         :param port: port that server will run on
-        :param bindIP: IP that server will listen too
+        :param bindIP: IP that server will check if it uses port 2001, 2002, 2003
         """
         self.recv_q = recv_q
         self.port = port
@@ -29,7 +30,7 @@ class Server_comm:
         :return: nothing
         """
 
-        self.socket.bind((self.bindIP, self.port))
+        self.socket.bind(("0.0.0.0", self.port))
         self.socket.listen(3)
         self.is_running = True
 
@@ -43,26 +44,14 @@ class Server_comm:
                     client, addr = self.socket.accept()
                     print(f"{addr[0]} - connected")
                     # check if server is keyboard, mouse or screen server, if yes check if ip connected is bindIP
-                    if self.port != 2000 and self.bindIP != addr:
+                    if self.port != 2000 and self.bindIP != addr[0]:
                         self._disconnect_client(client)
                     # create a new shared key with client using RSA and AES encryption
                     threading.Thread(target=self._get_shared_key, args=(addr[0], client)).start()
                 else:
-                    # get data len of client data
+                    # get data len of client data and client data and decrypt
                     try:
-                        datalen = current_socket.recv(3).decode()
-                    except Exception as e:
-                        print(e)
-                        print("main server in server conn")
-                        self._disconnect_client(current_socket)
-                        continue
-
-                    if not datalen.isnumeric():
-                        self._disconnect_client(current_socket)
-                        continue
-
-                    # get client data and decrypt
-                    try:
+                        datalen = int(current_socket.recv(3).decode())
                         data = current_socket.recv(int(datalen))
                     except Exception as e:
                         print(str(e))
@@ -113,6 +102,7 @@ class Server_comm:
             if client is not None:
                 # if client exists in open clients encrypt with AES and send with length by protocol
                 if client in self.open_clients.keys():
+
                     msg = self.open_clients[client][1].encrypt(msg.encode())
                     try:
                         client.send(str(len(msg)).zfill(3).encode() + msg)
