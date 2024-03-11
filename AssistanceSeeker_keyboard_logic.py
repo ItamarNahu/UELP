@@ -1,14 +1,21 @@
 from clientComm import Client_comm
 import queue
-import multiprocessing
 from pynput import keyboard
+import keyboard as Keyboard
+import threading
 from pynput.keyboard import Key
 import AssistanceSeeker_protocol as protocol
 
-if __name__ == '__main__':
-    # change once start multiprocessing
-    otherIP = "192.168.4.93"
 
+def check_close(close_queue, client):
+    while True:
+        if Keyboard.is_pressed("shift+ctrl+d"):
+            close_queue.put("close")
+            client.close()
+            break
+
+
+def main_AS_keyboard(otherIP, close_queue):
     port = 2002
     recv_q = queue.Queue()
     client = Client_comm(otherIP, port, recv_q)
@@ -59,18 +66,23 @@ if __name__ == '__main__':
         1114154: Key.down,
         1114155: Key.left,
         1114156: Key.right}
+    closed = threading.Thread(target=check_close, args=(close_queue, client,))
+    closed.start()
     while True:
         data = recv_q.get()
-        opcode, key_val = protocol.unpackData(data)
-        key_val = int(key_val)
-        if key_val in special_keys_mapping.keys():
-            key = special_keys_mapping[key_val]
-        else:
-            if 0 < key_val < 27:
-                key_val += 96
-            key = chr(key_val)
+        if data != "close":
+            opcode, key_val = protocol.unpackData(data)
+            key_val = int(key_val)
+            if key_val in special_keys_mapping.keys():
+                key = special_keys_mapping[key_val]
+            else:
+                if 0 < key_val < 27:
+                    key_val += 96
+                key = chr(key_val)
 
-        if opcode == "01":
-            keyboard_cont.press(key)
-        elif opcode == "02":
-            keyboard_cont.release(key)
+            if opcode == "01":
+                keyboard_cont.press(key)
+            elif opcode == "02":
+                keyboard_cont.release(key)
+        else:
+            break

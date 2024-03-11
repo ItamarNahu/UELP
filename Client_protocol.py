@@ -8,11 +8,15 @@ def unpackData(data: str) -> str and list:
     opcode = data[:2]
     params = []
 
-    if opcode == "00" or opcode == "01" or opcode == "02" or opcode == "04":
+    if opcode == "01" or opcode == "02" or opcode == "04":
         # 0 if authorized 1 if not
         params.append(True) if data[2:] == "0" else params.append(False)
-    elif opcode == "03" or opcode == "05":
+    elif opcode == "03" or opcode == "00":
         params.append(data[2:])
+    elif opcode == "05":
+        ip_len = data[2:4]
+        params.append(data[4:4+int(ip_len)])
+        params.append(data[4+int(ip_len):])
 
     return opcode, params
 
@@ -49,10 +53,15 @@ def pack_signup_info(username: str, password: str) -> str:
 def pack_type_user(typeUser: str) -> str:
     """
     function packs user type decided based on the protocol
-    :param typeUser: user type wanted, 0-Helper 1-AssistanceSeeker
+    :param typeUser: user type wanted, H-Helper A-AssistanceSeeker
     :return: packed data based on protocol
     """
-    return "02" + typeUser
+    msg = "02"
+    if typeUser == "H":
+        msg += "0"
+    elif typeUser == "A":
+        msg += "1"
+    return msg
 
 
 def pack_code(code: str) -> str:

@@ -1,10 +1,12 @@
+import keyboard as Keyboard
 from pynput import keyboard
 from pynput.keyboard import Key
+import Helper_protocol
 
 
 # class to monitor keyboard
 class Keyboard_monitor:
-    def __init__(self, server, clientIP: str):
+    def __init__(self, server, clientIP: str, close_queue):
         """
         builder function creates new Keyboard_monitor object with the vars gotten and calls function _monitor_keyboard
         :param server: server to send keyboard data through
@@ -57,40 +59,61 @@ class Keyboard_monitor:
                                      Key.down: 1114154,
                                      Key.left: 1114155,
                                      Key.right: 1114156}
+        self.close_queue = close_queue
         self._monitor_keyboard()
+
+    def pressed_end(self):
+        # release shift ctrl and d
+        self.server.send(self.clientIP, Helper_protocol.pack_key_release(str(self.special_keys_mapping[Key.shift])))
+        self.server.send(self.clientIP, Helper_protocol.pack_key_release(str(self.special_keys_mapping[Key.ctrl])))
+        self.server.send(self.clientIP, Helper_protocol.pack_key_release(str(ord("d"))))
+
+        self.stop_listening()
+        self.close_queue.put("close")
+        self.server.recv_q.put(("disconnect", self.clientIP))
+        print(1111)
 
     def _monitor_keyboard(self):
         """
         function monitors and listens to keyboard clicks and releases and calls functions accordingly
-        :return: nothing
         """
-        with keyboard.Listener(on_press=self._on_press, on_release=self._on_release) as listener:
-            listener.join()
+        self.listener = keyboard.Listener(on_press=self._on_press, on_release=self._on_release)
+        Keyboard.add_hotkey("ctrl+shift+d", self.pressed_end)
+        self.listener.start()
+
+    def stop_listening(self):
+        """
+        Stops the keyboard listener.
+        """
+        if self.listener.is_alive():
+            self.listener.stop()
+            print(self)
 
     def _on_press(self, key):
         """
-        function is called when key is pressed, and checks if key is a special key or not and sneds value of key based on protocol and special keys mapping
-        :param key:
-        :return:
+        Function is called when key is pressed, and checks if key is a special key or not and sends value of
+         key based on protocol and special keys mapping
+        :param key: key pressed on keyboard
         """
 
-        msg = "01"
         if key in self.special_keys_mapping.keys():
-            msg += str(self.special_keys_mapping[key])
+            msg = str(self.special_keys_mapping[key])
         else:
-            msg += str(ord(key.char))
+            msg = str(ord(key.char))
+        msg = Helper_protocol.pack_key_click(msg)
 
         self.server.send(self.clientIP, msg)
 
     def _on_release(self, key):
         """
-
-        :param key:
-        :return:
+        Function is called when key is released and checks if key is in special keys, sends the value of key based on
+        protocol and special keys mapping
+        :param key: key released on keyboard
         """
-        msg = "02"
+
         if key in self.special_keys_mapping.keys():
-            msg += str(self.special_keys_mapping[key])
+            msg = str(self.special_keys_mapping[key])
         else:
-            msg += str(ord(key.char))
+            msg = str(ord(key.char))
+        msg = Helper_protocol.pack_key_release(msg)
         self.server.send(self.clientIP, msg)

@@ -26,7 +26,6 @@ class Client_comm:
     def _main_loop(self):
         """
         main client loop
-        :return: nothing
         """
         # connect to server
         try:
@@ -61,7 +60,6 @@ class Client_comm:
     def _get_shared_key(self):
         """
         function creates new shared key and sends it by servers public key to server
-        :return: nothing
         """
 
         # get servers string public key for RSA
@@ -69,14 +67,12 @@ class Client_comm:
             pubKey = self.socket.recv(451).decode()
         except Exception as e:
             sys.exit("server is down, try again later")
-
         # check string public key length
         if len(pubKey) != 451:
             sys.exit("server error in key gotten")
 
         # create new 64 character random shared key to send to server and for AES encryption
         shared_key_string = base64.b64encode(secrets.token_bytes(48)).decode()
-
         # send RSA encrypted shared key to server
         try:
             self.socket.send(RSA_cipher.encrypt(shared_key_string, pubKey))
@@ -90,31 +86,43 @@ class Client_comm:
         """
         function sends encrypted msg to server
         :param msg: msg to send to server
-        :return: nothing
+        """
+        # send data only if there is a shared key
+        while self.sharedKey is None:
+            continue
+
+        # encrypt msg and send it with msg length
+        msg = self.sharedKey.encrypt(msg.encode())
+
+        try:
+            self.socket.send((str(len(msg)).zfill(3)).encode() + msg)
+        except Exception as e:
+            print('client comm - send', str(e))
+            sys.exit("server is down, try again later")
+
+    def sendImage(self, data: str, imageData: bytes):
+        """
+        Function gets Image data and data header and sends to server
+        :param data: data header to send to server with data about Image
+        :param imageData: data of image
         """
         # send data only if there is a shared key
         if self.sharedKey is not None:
             # encrypt msg and send it with msg length
-            msg = self.sharedKey.encrypt(msg.encode())
+            data = self.sharedKey.encrypt(data.encode())
+            # send length of data, encrypted data and Image data
             try:
-                self.socket.send((str(len(msg)).zfill(3)).encode() + msg)
+                self.socket.send((str(len(data)).zfill(3)).encode())
+                self.socket.send(data)
+                self.socket.send(imageData)
             except Exception as e:
-                print('client comm - send', str(e))
+                print('client comm - sendImage', str(e))
                 sys.exit("server is down, try again later")
-
-    def sendImage(self, data, imageData):
-        """
-
-        :param data:
-        :param imageData:
-        :return:
-        """
-        pass
 
     def close(self):
         """
         end main loop and close socket
-        :return: nothing
         """
         self.is_running = False
         self.socket.close()
+        self.recv_q.put("close")

@@ -13,26 +13,31 @@ class Mouse_monitor:
         """
         self.server = server
         self.clientIP = clientIP
+        self.listener = None  # Initialize listener attribute
+
         self._monitor_mouse()
 
     def _monitor_mouse(self):
         """
         function creates a new listener for the mouse to listen for scroll clicks and movement
-        :return: nothing
         """
+        self.listener = pynput.mouse.Listener(on_move=self._on_move, on_click=self._on_click,
+                                              on_scroll=self._on_scroll)
+        self.listener.start()
 
-        with pynput.mouse.Listener(on_move=self._on_move, on_click=self._on_click,
-                                   on_scroll=self._on_scroll) as listener:
-            listener.join()
+    def stop_listening(self):
+        """
+        Stops the mouse listener.
+        """
+        if self.listener:
+            self.listener.stop()
 
     def _on_move(self, x: int, y: int):
         """
         function called when listener detects new pos of mouse and sends the pos to client by protocol
         :param x: x loc of mouse
         :param y: y loc of mouse
-        :return: nothing
         """
-
         self.server.send(self.clientIP, str(x).zfill(4) + str(y).zfill(4) + "4")
 
     def _on_click(self, x: int, y: int, button, pressed):
@@ -42,9 +47,7 @@ class Mouse_monitor:
         :param y: y pos of mouse click
         :param button: button to check mouse type click
         :param pressed: check pressed or released
-        :return: nothing
         """
-
         msg = str(x).zfill(4) + str(y).zfill(4)
         if button == pynput.mouse.Button.left:
             if pressed:
@@ -65,7 +68,6 @@ class Mouse_monitor:
         :param y: y pos of mouse scroll
         :param dx: added x for mouse scroll
         :param dy: added y for mouse scroll
-        :return: nothing
         """
         msg = str(x).zfill(4) + str(y).zfill(4)
         if dy > 0:
@@ -73,6 +75,7 @@ class Mouse_monitor:
         else:
             msg += "3"
         self.server.send(self.clientIP, msg)
+
 
 
 if __name__ == '__main__':

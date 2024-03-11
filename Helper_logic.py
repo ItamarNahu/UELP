@@ -1,18 +1,29 @@
-import queue
 from Monitor_Mouse import Mouse_monitor
 from Servercomm import Server_comm
-import multiprocessing
 from Monitor_Keyboard import Keyboard_monitor
+import queue
+import threading
 
-if __name__ == '__main__':
-    # change once start multiprocessing
-    otherIP = "192.168.4.97"
-    port = 2001
 
+def check(check_queue, listener):
+    while True:
+        data, ip = check_queue.get()
+        if data == "disconnect":
+            listener.stop_listening()
+            print(2)
+            break
+
+
+def main_Helper(otherIP, port, close_queue):
+    check_queue = queue.Queue()
     # create new server and monitor mouse or keyboard based on port gotten
-    recv_q = queue.Queue()
-    server = Server_comm(recv_q, port, otherIP)
+    server = Server_comm(check_queue, port, otherIP)
     if port == 2001:
-        Mouse_monitor(server, otherIP)
+        mouse = Mouse_monitor(server, otherIP)
+        threading.Thread(target=check, args=(check_queue, mouse,)).start()
     elif port == 2002:
-        Keyboard_monitor(server, otherIP)
+        keyboard = Keyboard_monitor(server, otherIP, close_queue)
+        threading.Thread(target=check, args=(check_queue, keyboard,)).start()
+    print(1)
+    while True:
+        print()

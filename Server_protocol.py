@@ -18,13 +18,13 @@ def unpackData(data: str) -> str and list:
     return opcode, params
 
 
-def pack_login_ans(authorized: bool) -> str:
+def pack_login_ans(authorized: str) -> str:
     """
     function packs login ans based on the protocol
     :param authorized: True if login was authorized False otherwise
     :return: packed data based on protocol
     """
-    return "000" if authorized else "001"
+    return "00" + authorized
 
 
 def pack_signup_ans(authorized: bool) -> str:
@@ -45,14 +45,13 @@ def pack_typeuser_ans(authorized: bool) -> str:
     return "020" if authorized else "021"
 
 
-def pack_getcode_ans(authorized: bool, code: str) -> str:
+def pack_getcode_ans(code: str) -> str:
     """
     function packs get code request ans based on the protocol
-    :param authorized: True if get code req was authorized False otherwise
     :param code: code to send
     :return: packed data based on protocol
     """
-    return "03" + code if authorized else "031"
+    return "03" + code
 
 
 def pack_expired_code() -> str:
@@ -72,10 +71,10 @@ def pack_code_ans(authorized: bool) -> str:
     return "040" if authorized else "041"
 
 
-def pack_con_data(ip: str) -> str:
+def pack_con_data(ip: str, userType: str) -> str:
     """
     function packs connection data msg based on the protocol
     :param ip: ip to send
     :return: packed data based on protocol
     """
-    return "05" + ip
+    return "05" + str(len(ip)).zfill(2) + ip + userType

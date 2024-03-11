@@ -3,6 +3,7 @@ import select
 import threading
 from AsymmetricEncryption import RSA_cipher
 from SymmetricEncryption import AES_hash_cipher
+import Helper_protocol
 
 
 class Server_comm:
@@ -27,7 +28,6 @@ class Server_comm:
         """
         function runs server main loop, connects clients creates shared keys with them and gets msgs from them
          and encrypts them for logic
-        :return: nothing
         """
 
         self.socket.bind(("0.0.0.0", self.port))
@@ -38,6 +38,7 @@ class Server_comm:
             rlist, wlist, xlist = select.select([self.socket] + list(self.open_clients.keys()),
                                                 list(self.open_clients.keys()), [], 0.03)
 
+
             for current_socket in rlist:
                 # new client
                 if current_socket is self.socket:
@@ -46,6 +47,7 @@ class Server_comm:
                     # check if server is keyboard, mouse or screen server, if yes check if ip connected is bindIP
                     if self.port != 2000 and self.bindIP != addr[0]:
                         self._disconnect_client(client)
+
                     # create a new shared key with client using RSA and AES encryption
                     threading.Thread(target=self._get_shared_key, args=(addr[0], client)).start()
                 else:
@@ -60,10 +62,9 @@ class Server_comm:
                         continue
 
                     data = self.open_clients[current_socket][1].decrypt(data)
-
                     # if data is from screen port call recvImage otherwise put in recv_q for logic
                     if self.port == 2003:
-                        self.recvImage(current_socket, data)
+                        self._recvImage(current_socket, data)
                     else:
                         self.recv_q.put((data, self.open_clients[current_socket][0]))
 
@@ -72,7 +73,6 @@ class Server_comm:
         function sends servers public key to new client and gets and saves the shared key of server and client
         :param clientIP: ip of client to create shared key with
         :param curSocket: socket of client to create shared key with
-        :return: nothing
         """
         # send servers public key to client and get a shared encrypted key from client
         try:
@@ -95,7 +95,6 @@ class Server_comm:
         send encrypted data to certain client
         :param ip: ip of client to send msg too
         :param msg: msg to send to client
-        :return: nothing
         """
         if self.is_running:
             client = self._find_socket_by_ip(ip)
@@ -117,9 +116,9 @@ class Server_comm:
         :return:nothing
         """
         # if client in open_clients remove him and tell logic by sending disconnect
-        if client in self.open_clients.keys():
+        if client in self.open_clients.keys() and self.recv_q:
             print(f"{self.open_clients[client]} - disconnect")
-            self.recv_q.put(("disconnect", self.open_clients[client]))
+            self.recv_q.put(("disconnect", self.open_clients[client][0]))
             del self.open_clients[client]
         client.close()
 
@@ -139,7 +138,6 @@ class Server_comm:
     def close_server(self):
         """
         end main loop
-        :return: nothing
         """
         self.is_running = False
 
@@ -154,17 +152,79 @@ class Server_comm:
         """
         function closes a client
         :param clientIP: ip of client to close
-        :return: nothing
         """
         client = self._find_socket_by_ip(clientIP)
+
         if client is not None:
             self._disconnect_client(self._find_socket_by_ip(clientIP))
 
-    def recvImage(self, client, data: str):
+    def _recvImage(self, client, data: str):
+        """
+        Function is called when port is screen port and data was gotten from client of bindIP
+        :param client: client gotten data from
+        :param data: data gotten from client for screen
         """
 
-        :param client:
-        :param data:
-        :return:
-        """
-        pass
+        if client and client in self.open_clients.keys():
+            client_ip = self.open_clients[client][0]
+            # unpack data based on protocol
+            opcode, params = Helper_protocol.unpackData(data)
+            file_is_ok = True
+            image_data_size = ""
+            # if opcode is 01 we got a part image, if it is 02 we got a full Image
+            # take out data accordingly
+            if opcode == "01":
+                if len(params) == 5:
+                    top = params[0]
+                    left = params[1]
+                    bottom = params[2]
+                    right = params[3]
+                    image_data_size = params[4]
+                else:
+                    self._disconnect_client(client)
+                    file_is_ok = False
+            elif opcode == "02":
+                if len(params) == 1:
+                    image_data_size = params[0]
+                else:
+                    self._disconnect_client(client)
+                    file_is_ok = False
+            else:
+                self._disconnect_client(client)
+                file_is_ok = False
+
+            # check image data size gotten
+            if not image_data_size.isnumeric():
+                self._disconnect_client(client)
+                file_is_ok = False
+
+            if file_is_ok:
+                image_data_size = int(image_data_size)
+
+                # receive file data
+                file = bytearray()
+                while len(file) < image_data_size and file_is_ok:
+                    size = image_data_size - len(file)
+                    if size > 1024:
+                        try:
+                            file.extend(client.recv(1024))
+                        except Exception as e:
+                            self._disconnect_client(client)
+                            file_is_ok = False
+                    else:
+                        try:
+                            file.extend(client.recv(size))
+                        except Exception as e:
+                            self._disconnect_client(client)
+                            file_is_ok = False
+
+                # put image header data and image data in queue
+                if file_is_ok:
+                    all_image_data = []
+                    if len(params) == 5:
+                        all_image_data.append(top)
+                        all_image_data.append(left)
+                        all_image_data.append(bottom)
+                        all_image_data.append(right)
+                    all_image_data.append(file)
+                    self.recv_q.put((all_image_data, client_ip))

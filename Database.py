@@ -18,7 +18,6 @@ class Database_comm:
     def _create_db(self):
         """
         function creates new tables USERS and MACS if thy don't already exist
-        :return: nothing
         """
 
         # connect to DB
@@ -56,8 +55,10 @@ class Database_comm:
             self.curr.execute("INSERT INTO " + self.loginTableName + " (username, password) VALUES (?, ?)",
                               (username, AES_hash_cipher.hash(password)))
             self.conn.commit()
-            return True
-        return False
+            ans = True
+        else:
+            ans = False
+        return ans
 
     def checkPassword(self, username: str, password: str) -> bool:
         """
@@ -70,8 +71,10 @@ class Database_comm:
         if len(username) < 26 and self._checkUser(username):
             self.curr.execute("SELECT password FROM " + self.loginTableName + " WHERE username = ? and password = ?",
                               (username, AES_hash_cipher.hash(password)))
-            return self.curr.fetchone() is not None
-        return False
+            ans = self.curr.fetchone() is not None
+        else:
+            ans = False
+        return ans
 
     def macExists(self, mac: str) -> bool:
         """
@@ -94,5 +97,11 @@ class Database_comm:
             self.curr.execute("INSERT INTO " + self.blacklistTableName + " (mac) VALUES (?)",
                               (AES_hash_cipher.hash(mac),))
             self.conn.commit()
-            return True
-        return False
+            ans = True
+        else:
+            ans = False
+        return ans
+
+if __name__ == '__main__':
+    db = Database_comm()
+    print(db.addBlackMac("64:00:6A:42:93:FE"))

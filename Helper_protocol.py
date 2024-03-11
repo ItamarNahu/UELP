@@ -7,14 +7,14 @@ def unpackData(data: str) -> str and list:
 
     opcode = data[:2]
     params = []
-
-    img_params = data[2:]
-    new_str = ""
-    for i in range(1, len(img_params) + 1):
-        new_str += img_params[i - 1]
-        if i % 4 == 0:
-            params.append(new_str)
-            new_str = ""
+    if opcode == "01":
+        params.append(data[2:6])
+        params.append(data[6:10])
+        params.append(data[10:14])
+        params.append(data[14:18])
+        params.append(data[18:])
+    elif opcode == "02":
+        params.append(data[2:])
 
     return opcode, params
 
@@ -25,7 +25,7 @@ def pack_key_click(unicode_key: str) -> str:
     :param unicode_key: unicode_key clicked
     :return: packed data based on protocol
     """
-    return "01" + unicode_key
+    return "01" + unicode_key.zfill(7)
 
 
 def pack_key_release(unicode_key: str) -> str:
@@ -34,4 +34,4 @@ def pack_key_release(unicode_key: str) -> str:
     :param unicode_key: unicode_key clicked
     :return: packed data based on protocol
     """
-    return "02" + unicode_key
+    return "02" + unicode_key.zfill(7)
