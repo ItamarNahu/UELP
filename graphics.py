@@ -35,6 +35,8 @@ class MainPanel(wx.Panel):
         v_box.Add(self.helper)
         self.Assistance_seeker = ASPanel(self, self.frame)
         v_box.Add(self.Assistance_seeker)
+        self.connecting = ConnectingPanel(self, self.frame)
+        v_box.Add(self.connecting)
         self.login.Show()
         self.SetSizer(v_box)
         self.Layout()
@@ -54,25 +56,29 @@ class LoginPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         title = wx.StaticText(self, -1, label="UELP")
-        titlefont = wx.Font(22, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        titlefont = wx.Font(68, wx.MODERN, wx.NORMAL, wx.NORMAL, False)
         title.SetForegroundColour("#c4dfe6")
         title.SetFont(titlefont)
-        # username
+
+        # Username box
         nameBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.nameField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(150, -1))
+        self.nameField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(300, 40))
+        self.nameField.SetFont(wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
         self.set_placeholder_text(self.nameField, "Username")
         nameBox.Add(wx.StaticBitmap(self, -1, wx.Bitmap("user.png")), 0, wx.ALL, 5)  # Add username image
         nameBox.Add(self.nameField, 0, wx.ALL, 5)
         self.nameField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
-        # password
+
+        # Password box
         passBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.passField = wx.TextCtrl(self, -1, style=wx.TE_PASSWORD, size=(150, -1))
+        self.passField = wx.TextCtrl(self, -1, style=wx.TE_PASSWORD, size=(300, 40))
+        self.passField.SetFont(wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
         self.set_placeholder_text(self.passField, "a12fgtegp")
         passBox.Add(wx.StaticBitmap(self, -1, wx.Bitmap("pass.png")), 0, wx.ALL, 5)  # Add password image
         passBox.Add(self.passField, 0, wx.ALL, 5)
         self.passField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
 
-        # login & registration buttons
+        # Login & Registration buttons
         btnBox = wx.BoxSizer(wx.HORIZONTAL)
         self.loginBtn = wx.Button(self, wx.ID_ANY, label="login", size=(100, 40))
         self.loginBtn.Bind(wx.EVT_BUTTON, self.handle_login)
@@ -87,19 +93,21 @@ class LoginPanel(wx.Panel):
         self.interactive_elements = [self.nameField, self.passField, self.loginBtn,
                                      self.regBtn]
 
-        # add all elements to sizer
+        # Add all elements to sizer
         sizer.Add(title, 0, wx.CENTER | wx.TOP, 5)
         sizer.AddSpacer(10)
-        sizer.Add(nameBox, 0, wx.CENTER | wx.ALL, 5)
-        sizer.Add(passBox, -1, wx.CENTER | wx.ALL, 5)
+        sizer.AddStretchSpacer()
+        sizer.Add(nameBox, 0, wx.ALL | wx.CENTER, 5)
+        sizer.Add(passBox, 0, wx.ALL | wx.CENTER, 5)
         sizer.AddSpacer(10)
         sizer.Add(btnBox, wx.CENTER | wx.ALL, 5)
+        sizer.AddStretchSpacer()
 
         # Add logo at the bottom right
         logo = wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"))
         sizer.Add(logo, 0, wx.ALIGN_RIGHT | wx.BOTTOM, 5)
 
-        # arrange the screen
+        # Arrange the screen
         self.SetSizer(sizer)
         self.Layout()
         self.Hide()
@@ -224,7 +232,7 @@ class SelectUserPanel(wx.Panel):
         self.SetBackgroundColour(wx.LIGHT_GREY)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.title = wx.StaticText(self, -1, label="UELP")
-        titlefont = wx.Font(22, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        titlefont = wx.Font(68, wx.MODERN, wx.NORMAL, wx.NORMAL, False)
         self.title.SetForegroundColour("#c4dfe6")
         self.title.SetFont(titlefont)
         select = wx.StaticText(self, -1, label="Select User Type")
@@ -370,7 +378,7 @@ class HelperPanel(wx.Panel):
         title_code_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.title = wx.StaticText(self, -1, label="UELP")
-        titlefont = wx.Font(22, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        titlefont = wx.Font(68, wx.MODERN, wx.NORMAL, wx.NORMAL, False)
         self.title.SetForegroundColour("#c4dfe6")
         self.title.SetFont(titlefont)
         title_code_sizer.Add(self.title, 0, wx.CENTER | wx.TOP, 5)
@@ -407,6 +415,7 @@ class HelperPanel(wx.Panel):
         self.Hide()
 
         pub.subscribe(self.handle_code_gotten, "gotten_code")
+        pub.subscribe(self.handle_connecting_session, "connecting_session")
 
     def handle_code_gotten(self, ans):
         if ans == "2":
@@ -423,6 +432,10 @@ class HelperPanel(wx.Panel):
             self.code.Show()
             self.Layout()
 
+    def handle_connecting_session(self):
+        self.parent.change_screen(self, self.parent.connecting)
+        self.parent.connecting.start_dots_animation()
+
 
 class ASPanel(wx.Panel):
     def __init__(self, parent, frame):
@@ -432,7 +445,7 @@ class ASPanel(wx.Panel):
         self.SetBackgroundColour(wx.LIGHT_GREY)
         sizer = wx.BoxSizer(wx.VERTICAL)
         title = wx.StaticText(self, -1, label="UELP")
-        titlefont = wx.Font(22, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        titlefont = wx.Font(68, wx.MODERN, wx.NORMAL, wx.NORMAL, False)
         title.SetForegroundColour("#c4dfe6")
         title.SetFont(titlefont)
         enter = wx.StaticText(self, -1, label="Enter Session Code:")
@@ -475,8 +488,8 @@ class ASPanel(wx.Panel):
 
     def handle_code_ans(self, ans):
         if ans:
-            pass
-            # connect screen
+            self.parent.change_screen(self, self.parent.connecting)
+            self.parent.connecting.start_dots_animation()
         else:
             self.show_invalid_message("Session code incorrect", 2000)
 
@@ -516,6 +529,65 @@ class ASPanel(wx.Panel):
     def enable_interactive_elements(self):
         for element in self.interactive_elements:
             element.Enable()
+
+
+class ConnectingPanel(wx.Panel):
+    def __init__(self, parent, frame):
+        wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
+        self.frame = frame
+        self.parent = parent
+        self.SetBackgroundColour(wx.LIGHT_GREY)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.connecting_text = wx.StaticText(self, -1, label="Connecting to session")
+        connecting_font = wx.Font(90, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        self.connecting_text.SetForegroundColour("#000000")
+        self.connecting_text.SetFont(connecting_font)
+
+        self.disconnect_instruction = wx.StaticText(self, -1,
+                                                    label="To disconnect from session press: Ctrl + Shift + D")
+        disconnect_font = wx.Font(25, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        self.disconnect_instruction.SetForegroundColour("#880808")
+        self.disconnect_instruction.SetFont(disconnect_font)
+
+        # Add connecting text to center vertically
+        self.sizer.AddStretchSpacer()
+        self.sizer.Add(self.connecting_text, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP, 5)
+
+        # Add a spacer to push disconnect instruction closer to the bottom
+        self.sizer.AddStretchSpacer()
+
+        # Add disconnect instruction just above the logo and in the middle
+        self.sizer.Add(self.disconnect_instruction, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, 20)
+
+        # Add logo at the bottom right
+        self.logo = wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"))
+        # Add a flexible space to push the logo to the bottom-right
+        self.sizer.Add(self.logo, 0, wx.ALIGN_RIGHT | wx.ALIGN_BOTTOM | wx.ALL, 5)
+
+        # arrange the screen
+        self.SetSizer(self.sizer)
+        self.Layout()
+        self.Hide()
+
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer)
+        self.dots_counter = 0
+
+    def on_timer(self, event):
+        text = self.connecting_text.GetLabel()
+        if text.endswith("..."):
+            self.connecting_text.SetLabel("Connecting to session")
+            self.dots_counter += 1
+        else:
+            self.connecting_text.SetLabel(text + ".")
+
+        if self.dots_counter >= 4:  # Stop after reaching 4 sets of 3 dots
+            self.timer.Stop()
+            self.parent.frame.Close()
+
+    def start_dots_animation(self):
+        self.timer.Start(500)
 
 
 if __name__ == '__main__':

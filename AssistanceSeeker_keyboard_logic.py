@@ -73,6 +73,12 @@ def main_AS_keyboard(otherIP, close_queue):
         if data != "close":
             opcode, key_val = protocol.unpackData(data)
             key_val = int(key_val)
+            if key_val == 9999999:
+                print("released end")
+                keyboard_cont.release(Key.shift)
+                keyboard_cont.release(Key.ctrl)
+                keyboard_cont.release("d")
+                break
             if key_val in special_keys_mapping.keys():
                 key = special_keys_mapping[key_val]
             else:
@@ -81,8 +87,10 @@ def main_AS_keyboard(otherIP, close_queue):
                 key = chr(key_val)
 
             if opcode == "01":
+                print(key)
                 keyboard_cont.press(key)
             elif opcode == "02":
                 keyboard_cont.release(key)
+                print(key)
         else:
             break

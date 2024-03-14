@@ -2,7 +2,7 @@ import Client_protocol as Protocol
 import queue
 import threading
 from clientComm import Client_comm
-from getmac import get_mac_address as gma
+from uuid import getnode
 import wx
 import graphics
 from pubsub import pub
@@ -12,6 +12,7 @@ import Helper_screen_logic
 import AssistanceSeeker_keyboard_logic
 import AssistanceSeeker_mouse_logic
 import AssistanceSeeker_screen_logic
+import time
 
 
 def handleMsgs(client, recv_q):
@@ -26,7 +27,7 @@ def handleMsgs(client, recv_q):
 
 
 def send_mac(client):
-    mac_address = gma()
+    mac_address = ':'.join(['{:02x}'.format((getnode() >> i) & 0xff) for i in range(0, 8 * 6, 8)][::-1])
     client.send(Protocol.pack_mac_addr(mac_address))
 
 
@@ -55,13 +56,13 @@ def handle_code_ans(params):
     wx.CallAfter(pub.sendMessage, "code_ans", ans=code_ans)
 
 
-def check_closed(close_queue, mouse, screen):
+def check_closed(close_queue, mouse, screen, keyboard):
     while True:
         data = close_queue.get()
         if data == "close":
             mouse.terminate()
             screen.terminate()
-            print(33333)
+            keyboard.terminate()
             break
 
 
@@ -71,6 +72,7 @@ def handle_conData(params):
     if user_Type:
         close_queue = multiprocessing.Queue()
         if user_Type == "H":
+            wx.CallAfter(pub.sendMessage, "connecting_session")
             mouse = multiprocessing.Process(target=Helper_logic.main_Helper, args=(otherIP, 2001, None,))
             keyboard = multiprocessing.Process(target=Helper_logic.main_Helper, args=(otherIP, 2002, close_queue,))
             screen = multiprocessing.Process(target=Helper_screen_logic.main_Helper_screen, args=(otherIP,))
@@ -80,16 +82,16 @@ def handle_conData(params):
                                                args=(otherIP, close_queue,))
             screen = multiprocessing.Process(target=AssistanceSeeker_screen_logic.main_AS_screen, args=(otherIP,))
         client.close()
-        client.close()
-        allGraphics.Close()
+
+        time.sleep(7)
         mouse.start()
         keyboard.start()
         screen.start()
-        check_closed(close_queue, mouse, screen)
+        check_closed(close_queue, mouse, screen, keyboard)
 
 
 if __name__ == '__main__':
-    ip = "192.168.4.91"
+    ip = "192.168.4.77"
     port = 2000
     recv_q = queue.Queue()
     client = Client_comm(ip, port, recv_q)

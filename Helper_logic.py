@@ -10,7 +10,6 @@ def check(check_queue, listener):
         data, ip = check_queue.get()
         if data == "disconnect":
             listener.stop_listening()
-            print(2)
             break
 
 
@@ -24,6 +23,4 @@ def main_Helper(otherIP, port, close_queue):
     elif port == 2002:
         keyboard = Keyboard_monitor(server, otherIP, close_queue)
         threading.Thread(target=check, args=(check_queue, keyboard,)).start()
-    print(1)
-    while True:
-        print()
+

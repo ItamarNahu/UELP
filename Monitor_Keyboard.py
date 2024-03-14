@@ -2,7 +2,7 @@ import keyboard as Keyboard
 from pynput import keyboard
 from pynput.keyboard import Key
 import Helper_protocol
-
+import time
 
 # class to monitor keyboard
 class Keyboard_monitor:
@@ -64,14 +64,11 @@ class Keyboard_monitor:
 
     def pressed_end(self):
         # release shift ctrl and d
-        self.server.send(self.clientIP, Helper_protocol.pack_key_release(str(self.special_keys_mapping[Key.shift])))
-        self.server.send(self.clientIP, Helper_protocol.pack_key_release(str(self.special_keys_mapping[Key.ctrl])))
-        self.server.send(self.clientIP, Helper_protocol.pack_key_release(str(ord("d"))))
-
+        self.server.send(self.clientIP, Helper_protocol.pack_key_release("9999999"))
         self.stop_listening()
+
+        time.sleep(0.1)
         self.close_queue.put("close")
-        self.server.recv_q.put(("disconnect", self.clientIP))
-        print(1111)
 
     def _monitor_keyboard(self):
         """
@@ -87,7 +84,6 @@ class Keyboard_monitor:
         """
         if self.listener.is_alive():
             self.listener.stop()
-            print(self)
 
     def _on_press(self, key):
         """

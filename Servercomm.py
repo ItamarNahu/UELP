@@ -119,6 +119,8 @@ class Server_comm:
         if client in self.open_clients.keys() and self.recv_q:
             print(f"{self.open_clients[client]} - disconnect")
             self.recv_q.put(("disconnect", self.open_clients[client][0]))
+            if (self.port == 2001 or self.port == 2002 or self.port == 2003) and self.open_clients[client][0] == self.bindIP:
+                self.close_server()
             del self.open_clients[client]
         client.close()
 
