@@ -91,7 +91,7 @@ def handle_conData(params):
 
 
 if __name__ == '__main__':
-    ip = "192.168.4.77"
+    ip = "192.168.0.224"
     port = 2000
     recv_q = queue.Queue()
     client = Client_comm(ip, port, recv_q)

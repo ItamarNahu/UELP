@@ -119,6 +119,7 @@ if __name__ == '__main__':
     port = 2000
     codes = Session_codes(expired_q)
     server = Server_comm(recv_q, port)
+
     commands = {"00": handle_login, "01": handle_signup, "02": handle_typeUser, "03": handle_getCode,
                 "04": handle_codeCheck, "06": handle_mac_addr}
     users = {}

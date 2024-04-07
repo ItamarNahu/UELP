@@ -1,8 +1,9 @@
 import wx
+import wx.adv
 import Client_protocol
 from pubsub import pub
 import re
-
+import pyperclip
 
 class MyFrame(wx.Frame):
     def __init__(self, comm, parent=None):
@@ -54,17 +55,21 @@ class LoginPanel(wx.Panel):
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
-        self.SetBackgroundColour(wx.LIGHT_GREY)
+        self.SetBackgroundColour("#fdf0d0")
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
-        title.SetForegroundColour("#c4dfe6")
+        title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
+
+        self.about = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap("info.png"), pos=(1850, 5))
+        self.about.Bind(wx.EVT_LEFT_DOWN, self.show_info_dialog)
 
         signin = wx.StaticText(self, -1, label="Sign In", pos=(720, 100))
         signinFont = wx.Font(125, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
         signin.SetFont(signinFont)
+        signin.SetForegroundColour("#3f4043")
 
         self.nameField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(600, 100))
         self.nameField.SetFont(wx.Font(65, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
@@ -81,8 +86,9 @@ class LoginPanel(wx.Panel):
         self.passField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
 
         # next acting as a button
-        next_bitmap = wx.Bitmap("login_off.png")
-        self.next = wx.StaticBitmap(self, wx.ID_ANY, next_bitmap)
+        self.login_bitmap = wx.Bitmap("login.png")
+        self.login_off_bitmap = wx.Bitmap("login_off.png")
+        self.next = wx.StaticBitmap(self, wx.ID_ANY, self.login_off_bitmap)
         self.next.Bind(wx.EVT_LEFT_DOWN, self.on_next_click)
         self.can_press = False
 
@@ -109,7 +115,6 @@ class LoginPanel(wx.Panel):
         sizer.AddSpacer(110)
         sizer.Add(self.next, 0, wx.CENTER, 5)
         sizer.Add(self.signup_sizer, 0, wx.CENTER, 5)
-        sizer.AddStretchSpacer(1)
 
         # Add logo at the bottom right
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
@@ -136,7 +141,7 @@ class LoginPanel(wx.Panel):
         self.invalidText.SetForegroundColour(wx.RED)
         self.invalidText.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
         sizer = self.GetSizer()
-        sizer.Insert(sizer.GetItemCount() - 2, self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
+        sizer.Insert(sizer.GetItemCount(), self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
 
         self.disable_interactive_elements()
         self.Layout()
@@ -181,10 +186,10 @@ class LoginPanel(wx.Panel):
         username = self.nameField.GetValue()
         password = self.passField.GetValue()
         if not username or not password or username == "Username" or password == "a12fgtegp":
-            self.next.SetBitmap(wx.Bitmap("login_off.png"))
+            self.next.SetBitmap(self.login_off_bitmap)
             self.can_press = False
-        else:
-            self.next.SetBitmap(wx.Bitmap("login.png"))
+        elif not self.can_press:
+            self.next.SetBitmap(self.login_bitmap)
             self.can_press = True
 
     def on_next_click(self, event):
@@ -193,6 +198,19 @@ class LoginPanel(wx.Panel):
         if self.can_press:
             msg2send = Client_protocol.pack_login_info(username, password)
             self.frame.client.send(msg2send)
+
+    def show_info_dialog(self, event):
+        info = wx.adv.AboutDialogInfo()
+        info.SetName("Itamar system")
+        info.SetDescription("This system allow you to Control and help friends computer from your own")
+        info.SetCopyright("(C) 2024-2030")
+        info.AddDeveloper("Itamar Nahum")
+        info.AddArtist("Itamar Nahum")
+        info.AddDocWriter("Itamar Nahum")
+        info.SetVersion("1.0")
+        info.SetName("UELP")
+        info.SetLicence("Atid \n Cramim \n Israel")
+        wx.adv.AboutBox(info)
 
     def handle_signup_screen(self, event):
         self.parent.change_screen(self, self.parent.signup)
@@ -226,17 +244,18 @@ class SignUpPanel(wx.Panel):
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
-        self.SetBackgroundColour(wx.LIGHT_GREY)
+        self.SetBackgroundColour("#fdf0d0")
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
-        title.SetForegroundColour("#c4dfe6")
+        title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
 
-        signin = wx.StaticText(self, -1, label="Sign Up", pos=(705, 100))
-        signinFont = wx.Font(125, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
-        signin.SetFont(signinFont)
+        signup = wx.StaticText(self, -1, label="Sign Up", pos=(705, 100))
+        signupFont = wx.Font(125, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
+        signup.SetFont(signupFont)
+        signup.SetForegroundColour("#3f4043")
 
         self.nameField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(600, 100))
         self.nameField.SetFont(wx.Font(65, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
@@ -253,8 +272,9 @@ class SignUpPanel(wx.Panel):
         self.passField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
 
         # next acting as a button
-        next_bitmap = wx.Bitmap("signin_off.png")
-        self.next = wx.StaticBitmap(self, wx.ID_ANY, next_bitmap)
+        self.signup_bitmap = wx.Bitmap("signup.png")
+        self.signup_off_bitmap = wx.Bitmap("signup_off.png")
+        self.next = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap("signup_off.png"))
         self.next.Bind(wx.EVT_LEFT_DOWN, self.on_next_click)
         self.can_press = False
 
@@ -262,14 +282,14 @@ class SignUpPanel(wx.Panel):
         have_account = wx.StaticText(self, -1, label="Already have an account?")
         have_account_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         have_account.SetFont(have_account_font)
-        self.signin = wx.StaticText(self, -1, label="Login")
+        self.login = wx.StaticText(self, -1, label="Login")
         signup_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, True, "Calisto MT")
-        self.signin.Bind(wx.EVT_LEFT_DOWN, self.handle_signin_screen)
-        self.signin.SetFont(signup_font)
-        self.signin.SetForegroundColour("#0000FF")
+        self.login.Bind(wx.EVT_LEFT_DOWN, self.handle_signin_screen)
+        self.login.SetFont(signup_font)
+        self.login.SetForegroundColour("#0000FF")
         self.signup_sizer.Add(have_account, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
         self.signup_sizer.AddSpacer(8)
-        self.signup_sizer.Add(self.signin, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        self.signup_sizer.Add(self.login, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
         self.interactive_elements = [self.nameField, self.passField, self.next]
 
         # Add all elements to sizer
@@ -281,7 +301,6 @@ class SignUpPanel(wx.Panel):
         sizer.AddSpacer(110)
         sizer.Add(self.next, 0, wx.CENTER, 5)
         sizer.Add(self.signup_sizer, 0, wx.CENTER, 5)
-        sizer.AddStretchSpacer(1)
 
         # Add logo at the bottom right
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
@@ -307,7 +326,7 @@ class SignUpPanel(wx.Panel):
         self.invalidText.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
 
         sizer = self.GetSizer()
-        sizer.Insert(sizer.GetItemCount() - 2, self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
+        sizer.Insert(sizer.GetItemCount(), self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
 
         self.disable_interactive_elements()
         self.Layout()
@@ -352,10 +371,10 @@ class SignUpPanel(wx.Panel):
         username = self.nameField.GetValue()
         password = self.passField.GetValue()
         if not username or not password or username == "Username" or password == "a12fgtegp":
-            self.next.SetBitmap(wx.Bitmap("signin_off.png"))
+            self.next.SetBitmap(self.signup_off_bitmap)
             self.can_press = False
-        else:
-            self.next.SetBitmap(wx.Bitmap("signin.png"))
+        elif not self.can_press:
+            self.next.SetBitmap(self.signup_bitmap)
             self.can_press = True
 
     def on_next_click(self, event):
@@ -397,17 +416,18 @@ class SelectUserPanel(wx.Panel):
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
-        self.SetBackgroundColour(wx.LIGHT_GREY)
+        self.SetBackgroundColour("#fdf0d0")
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        self.title = wx.StaticText(self, -1, label="UELP")
+        title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
-        self.title.SetForegroundColour("#c4dfe6")
-        self.title.SetFont(titlefont)
+        title.SetForegroundColour("#aa7c57")
+        title.SetFont(titlefont)
 
         select = wx.StaticText(self, -1, label="Select User Type")
         selectfont = wx.Font(55, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
         select.SetFont(selectfont)
+        select.SetForegroundColour("#3f4043")
 
         # Helper & Assistance Seeker buttons
         btnBox = wx.BoxSizer(wx.HORIZONTAL)
@@ -429,7 +449,7 @@ class SelectUserPanel(wx.Panel):
         btnBox.Add(self.As, 0, wx.Center)
 
         # Add all elements to sizer
-        sizer.Add(self.title, 0, wx.CENTER | wx.TOP, 5)
+        sizer.Add(title, 0, wx.CENTER | wx.TOP, 5)
         sizer.Add(select, 0, wx.CENTER | wx.TOP, 5)
         sizer.AddSpacer(20)
         sizer.Add(btnBox, wx.CENTER | wx.ALL, 5)
@@ -489,14 +509,15 @@ class SelectUserPanel(wx.Panel):
     def show_invalid_message(self, msg, time):
         # Show red text message for certain time
         self.invalidText = wx.StaticText(self, label=msg, style=wx.ALIGN_CENTER)
-        invalidTextfont = wx.Font(22, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        invalidTextfont = wx.Font(48, wx.DECORATIVE, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         self.invalidText.SetFont(invalidTextfont)
         self.invalidText.SetForegroundColour(wx.RED)
 
-        sizer = self.GetSizer()
-        sizer.Insert(sizer.GetItemCount() -1, self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
-
+        self.invalidText.SetPosition((480, 540))
+        self.As.Hide()
+        self.helper.Hide()
         self.disable_interactive_elements()
+
         self.Layout()
 
         self.userType = None
@@ -508,8 +529,10 @@ class SelectUserPanel(wx.Panel):
         # Remove the invalid message after certain time
         if self.invalidText is not None:
             self.invalidText.Destroy()
-            self.Layout()
             self.enable_interactive_elements()
+            self.As.Show()
+            self.helper.Show()
+            self.Layout()
 
     def disable_interactive_elements(self):
         for element in self.interactive_elements:
@@ -525,35 +548,40 @@ class HelperPanel(wx.Panel):
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
-        self.SetBackgroundColour(wx.LIGHT_GREY)
+        self.SetBackgroundColour("#fdf0d0")
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # Create a sizer for the title and code label
-        title_code_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self.title = wx.StaticText(self, -1, label="UELP")
+        title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
-        self.title.SetForegroundColour("#c4dfe6")
-        self.title.SetFont(titlefont)
-        title_code_sizer.Add(self.title, 0, wx.CENTER | wx.TOP, 5)
-        title_code_sizer.AddSpacer(50)
+        title.SetForegroundColour("#aa7c57")
+        title.SetFont(titlefont)
 
-        self.yourcode = wx.StaticText(self, -1, label="Your Code")
+        yourcode = wx.StaticText(self, -1, label="Your Code")
         yourcodefont = wx.Font(120, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
-        self.yourcode.SetForegroundColour("#c4dfe6")
-        self.yourcode.SetFont(yourcodefont)
-        title_code_sizer.Add(self.yourcode, 0, wx.CENTER | wx.TOP, 5)
-        title_code_sizer.AddSpacer(100)
+        yourcode.SetFont(yourcodefont)
+        yourcode.SetForegroundColour("#3f4043")
 
         self.code = wx.StaticText(self, -1, label="None")
         codefont = wx.Font(150, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         self.code.SetForegroundColour("#000000")
         self.code.SetFont(codefont)
-        title_code_sizer.Add(self.code, 0, wx.CENTER | wx.TOP, 5)
         self.code.Hide()
-        # Add the title and code label sizer to the main sizer
-        sizer.Add(title_code_sizer, 1, wx.EXPAND | wx.ALL, 5)
+
+        self.copy_code_bitmap = wx.Bitmap("copy_code.png")
+        self.copy_code_hover_bitmap = wx.Bitmap("copy_code_hover.png")
+        self.copy_code = wx.StaticBitmap(self, -1, self.copy_code_bitmap)
+        self.copy_code.Bind(wx.EVT_ENTER_WINDOW, self.on_hover)
+        self.copy_code.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave)
+        self.copy_code.Bind(wx.EVT_LEFT_DOWN, self.handle_copied)  # Bind left click event
+        # Add to sizer
+        sizer.Add(title, 0, wx.CENTER | wx.TOP, 5)
+        sizer.AddSpacer(50)
+        sizer.Add(yourcode, 0, wx.CENTER | wx.TOP, 5)
+        sizer.AddSpacer(100)
+        sizer.Add(self.code, 0, wx.CENTER | wx.TOP, 5)
+        sizer.AddSpacer(100)
+        sizer.Add(self.copy_code, 0, wx.CENTER, 5)
 
         # Add logo at the bottom right
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
@@ -581,6 +609,22 @@ class HelperPanel(wx.Panel):
             self.code.Show()
             self.Layout()
 
+    def on_hover(self, event):
+        self.copy_code.SetBitmap(wx.Bitmap("copy_code_hover.png"))
+
+    def on_leave(self, event):
+        self.copy_code.SetBitmap(wx.Bitmap("copy_code.png"))
+
+    def handle_copied(self, event):
+        self.copy_code.SetBitmap(wx.Bitmap("copied.png"))
+        # copy Code to clipboard
+        pyperclip.copy(self.code.GetLabel())
+
+        # unbind all copy code events
+        self.copy_code.Unbind(wx.EVT_ENTER_WINDOW)
+        self.copy_code.Unbind(wx.EVT_LEAVE_WINDOW)
+        self.copy_code.Unbind(wx.EVT_LEFT_DOWN)
+
     def handle_connecting_session(self):
         self.parent.change_screen(self, self.parent.connecting)
         self.parent.connecting.start_dots_animation()
@@ -591,25 +635,27 @@ class ASPanel(wx.Panel):
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
-        self.SetBackgroundColour(wx.LIGHT_GREY)
+        self.SetBackgroundColour("#fdf0d0")
         sizer = wx.BoxSizer(wx.VERTICAL)
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
-        title.SetForegroundColour("#c4dfe6")
+        title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
         enter = wx.StaticText(self, -1, label="Enter Session Code")
-        enterfont = wx.Font(65, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
-        enter.SetForegroundColour("#000000")
+        enterfont = wx.Font(75, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
+        enter.SetForegroundColour("#3f4043")
         enter.SetFont(enterfont)
 
         # textctrl to enter code
-        self.codeField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(650, -1))
+        self.codeField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(800, -1))
         codefont = wx.Font(90, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         self.codeField.SetFont(codefont)
+        self.codeField.Bind(wx.EVT_TEXT, self.on_text_change)
 
-        # Button to connect
-        self.connect_btn = wx.Button(self, wx.ID_ANY, label="Connect")
-        self.connect_btn.Bind(wx.EVT_BUTTON, self.on_connect)
+        # connect acting as a button
+        self.connect = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap("connect_off.png"))
+        self.connect.Bind(wx.EVT_LEFT_DOWN, self.on_connect)
+        self.can_press = False
 
         # add all elements to sizer
         sizer.Add(title, 0, wx.CENTER | wx.TOP, 5)
@@ -617,13 +663,12 @@ class ASPanel(wx.Panel):
         sizer.Add(enter, 0, wx.CENTER | wx.TOP, 5)
         sizer.AddSpacer(100)
         sizer.Add(self.codeField, 0, wx.CENTER | wx.ALL, 5)
-        sizer.AddSpacer(50)
-        sizer.Add(self.connect_btn, 0, wx.CENTER | wx.ALL, 5)
+        sizer.AddSpacer(180)
+        sizer.Add(self.connect, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
 
         # Add logo at the bottom right
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
 
-        self.interactive_elements = [self.codeField, self.connect_btn]
         self.invalidText = None
         # arrange the screen
         self.SetSizer(sizer)
@@ -639,9 +684,19 @@ class ASPanel(wx.Panel):
         else:
             self.show_invalid_message("Session code incorrect", 2000)
 
+    def on_text_change(self, event):
+        text = self.codeField.GetValue()
+        if text != "":
+            if not self.can_press:
+                self.connect.SetBitmap(wx.Bitmap("connect.png"))
+                self.can_press = True
+        else:
+            self.connect.SetBitmap(wx.Bitmap("connect_off.png"))
+            self.can_press = False
+
     def on_connect(self, event):
         code_in_text = self.codeField.GetValue()
-        if code_in_text != "":
+        if self.can_press:
             msg2send = Client_protocol.pack_code(code_in_text)
             self.frame.client.send(msg2send)
 
@@ -649,12 +704,15 @@ class ASPanel(wx.Panel):
 
         # Show red text message for 5 seconds
         self.invalidText = wx.StaticText(self, label=msg, style=wx.ALIGN_CENTER)
+        self.invalidText.SetFont(wx.Font(35, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
         self.invalidText.SetForegroundColour(wx.RED)
 
         sizer = self.GetSizer()
-        sizer.Insert(sizer.GetItemCount() - 1, self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
+        sizer.Insert(sizer.GetItemCount(), self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
 
-        self.disable_interactive_elements()
+        self.codeField.Disable()
+        self.can_press = False
+        self.connect.SetBitmap(wx.Bitmap("connect_off.png"))
         self.Layout()
 
         self.timer = wx.Timer(self)
@@ -666,15 +724,9 @@ class ASPanel(wx.Panel):
         if self.invalidText is not None:
             self.invalidText.Destroy()
             self.Layout()
-            self.enable_interactive_elements()
-
-    def disable_interactive_elements(self):
-        for element in self.interactive_elements:
-            element.Disable()
-
-    def enable_interactive_elements(self):
-        for element in self.interactive_elements:
-            element.Enable()
+            self.codeField.Enable()
+            self.can_press = True
+            self.connect.SetBitmap(wx.Bitmap("connect.png"))
 
 
 class ConnectingPanel(wx.Panel):
@@ -682,21 +734,27 @@ class ConnectingPanel(wx.Panel):
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
-        self.SetBackgroundColour(wx.LIGHT_GREY)
+        self.SetBackgroundColour("#fdf0d0")
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
+        title = wx.StaticText(self, -1, label="UELP")
+        titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
+        title.SetForegroundColour("#aa7c57")
+        title.SetFont(titlefont)
+
         self.connecting_text = wx.StaticText(self, -1, label="Connecting to session")
-        connecting_font = wx.Font(90, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
-        self.connecting_text.SetForegroundColour("#000000")
+        connecting_font = wx.Font(90, wx.DECORATIVE, wx.NORMAL, wx.NORMAL, False, "Garamond")
+        self.connecting_text.SetForegroundColour("#3f4043")
         self.connecting_text.SetFont(connecting_font)
 
         self.disconnect_instruction = wx.StaticText(self, -1,
                                                     label="To disconnect from session press: Ctrl + Shift + D")
-        disconnect_font = wx.Font(25, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        disconnect_font = wx.Font(25, wx.DECORATIVE, wx.NORMAL, wx.NORMAL, False, "Garamond")
         self.disconnect_instruction.SetForegroundColour("#880808")
         self.disconnect_instruction.SetFont(disconnect_font)
 
         # Add connecting text to center vertically
+        self.sizer.Add(title, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP, 5)
         self.sizer.AddStretchSpacer()
         self.sizer.Add(self.connecting_text, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP, 5)
 
@@ -738,5 +796,5 @@ class ConnectingPanel(wx.Panel):
 
 if __name__ == '__main__':
     app = wx.App()
-    test = MyFrame()
+    test = MyFrame("A")
     app.MainLoop()

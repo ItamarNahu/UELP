@@ -104,4 +104,4 @@ class Database_comm:
 
 if __name__ == '__main__':
     db = Database_comm()
-    print(db.addBlackMac("50:9A:4C:2A:26:90"))
+    print(db.addBlackMac("64:00:6A:42:93:94"))
