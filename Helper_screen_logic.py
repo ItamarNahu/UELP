@@ -38,11 +38,15 @@ def main_Helper_screen(otherIP):
     pygame.init()
     screen_info = pygame.display.Info()
     screen_width, screen_height = screen_info.current_w, screen_info.current_h
-    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+    first_image = True
 
     while True:
         # get data from client
         if not recv_q.empty():
+            if first_image:
+                screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+                first_image = False
+
             data, ip = recv_q.get()
             if data == "disconnect":
                 pygame.quit()
@@ -71,12 +75,11 @@ def main_Helper_screen(otherIP):
                                              bytes(newScreen_bytes))
 
             # if there is currently a valid PIL image object as current screen show it to user using pygame
-            if currScreen:
+            if currScreen is not None:
                 # transform PIL image object to pygame image
                 currScreen_bytes = currScreen.tobytes()
                 pygame_currScreen = pygame.image.frombuffer(currScreen_bytes,
                                                             (screen_width, screen_height), "RGB")
-
                 # show image
                 screen.blit(pygame_currScreen, (0, 0))
                 pygame.display.flip()

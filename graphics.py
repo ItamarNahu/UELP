@@ -786,7 +786,7 @@ class ConnectingPanel(wx.Panel):
         else:
             self.connecting_text.SetLabel(text + ".")
 
-        if self.dots_counter >= 4:  # Stop after reaching 4 sets of 3 dots
+        if self.dots_counter >= 3:  # Stop after reaching 3 sets of 3 dots
             self.timer.Stop()
             self.parent.frame.Close()
 

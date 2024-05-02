@@ -219,6 +219,7 @@ class Server_comm:
                         except Exception as e:
                             self._disconnect_client(client)
                             file_is_ok = False
+                        break
 
                 # put image header data and image data in queue
                 if file_is_ok:

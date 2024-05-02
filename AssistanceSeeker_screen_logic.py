@@ -4,7 +4,7 @@ from PIL import ImageChops, ImageGrab
 import AssistanceSeeker_protocol
 import zlib
 import pygame
-import sys
+
 
 
 def getChanged(newScreen: ImageGrab, currScreen: ImageGrab):
@@ -61,8 +61,11 @@ def main_AS_screen(otherIP):
 
     currScreen_bytes = zlib.compress(currScreen_bytes)
 
+    while not client.exchangeStatus():
+        pass
     # send first screenshot to Helper based on protocol
     client.sendImage(AssistanceSeeker_protocol.pack_full_image(str(len(currScreen_bytes))), currScreen_bytes)
+
     while True:
         # get new screenshot
         newScreen = ImageGrab.grab()
@@ -76,6 +79,7 @@ def main_AS_screen(otherIP):
                 # send full screenshot to Helper based on protocol
                 client.sendImage(AssistanceSeeker_protocol.pack_full_image(str(len(newScreen_bytes))),
                                  newScreen_bytes)
+
             else:
                 # get the bounding box values of the difference Image
                 top, left, bottom, right = diff_bbox
@@ -88,6 +92,7 @@ def main_AS_screen(otherIP):
 
                 # send difference Image and Image header to Helper
                 client.sendImage(msg, diffBytes)
+
 
             # update currScreen as newScreen
             currScreen = newScreen

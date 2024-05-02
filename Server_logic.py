@@ -102,7 +102,7 @@ def handle_codeCheck(clientIP, db, server, params):
         codeAnswer = codes.checkCode(userCode)
         server.send(clientIP, Protocol.pack_code_ans(codeAnswer))
         if codeAnswer:
-            otherIP = codes.code_from_ip(userCode)
+            otherIP = codes.ip_from_code(userCode)
             server.send(clientIP, Protocol.pack_con_data(otherIP, "A"))
             server.send(otherIP, Protocol.pack_con_data(clientIP, "H"))
 

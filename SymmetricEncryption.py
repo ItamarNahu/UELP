@@ -5,6 +5,7 @@ import hashlib
 from Cryptodome.Util.Padding import pad, unpad
 
 
+# class to work with AES encryption and hash
 class AES_hash_cipher:
     def __init__(self, key: str):
         """

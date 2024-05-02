@@ -2,6 +2,7 @@ import sqlite3
 from SymmetricEncryption import AES_hash_cipher
 
 
+# class to work with Database and tables of Uelp_db.sql
 class Database_comm:
     def __init__(self):
         """
@@ -50,7 +51,7 @@ class Database_comm:
         :return: True if successfully added and False otherwise
         """
 
-        # check if username already exists in table if it dose not add it and his hashed password into USERS
+        # check if username already exists in table if it does not add it and his hashed password into USERS
         if len(username) < 26 and not self._checkUser(username):
             self.curr.execute("INSERT INTO " + self.loginTableName + " (username, password) VALUES (?, ?)",
                               (username, AES_hash_cipher.hash(password)))
@@ -101,6 +102,7 @@ class Database_comm:
         else:
             ans = False
         return ans
+
 
 if __name__ == '__main__':
     db = Database_comm()

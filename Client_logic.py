@@ -83,7 +83,7 @@ def handle_conData(params):
             screen = multiprocessing.Process(target=AssistanceSeeker_screen_logic.main_AS_screen, args=(otherIP,))
         client.close()
 
-        time.sleep(7)
+        time.sleep(5)
         mouse.start()
         keyboard.start()
         screen.start()
@@ -91,7 +91,7 @@ def handle_conData(params):
 
 
 if __name__ == '__main__':
-    ip = "192.168.0.224"
+    ip = "192.168.4.77"
     port = 2000
     recv_q = queue.Queue()
     client = Client_comm(ip, port, recv_q)

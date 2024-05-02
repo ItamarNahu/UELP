@@ -119,6 +119,9 @@ class Client_comm:
                 print('client comm - sendImage', str(e))
                 sys.exit("server is down, try again later")
 
+    def exchangeStatus(self):
+        return self.sharedKey is not None
+
     def close(self):
         """
         end main loop and close socket
