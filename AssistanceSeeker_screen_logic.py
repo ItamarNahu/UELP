@@ -6,7 +6,6 @@ import zlib
 import pygame
 
 
-
 def getChanged(newScreen: ImageGrab, currScreen: ImageGrab):
     """
     Function checks if there is a difference between two images, if there is it returns the difference Image
@@ -92,7 +91,6 @@ def main_AS_screen(otherIP):
 
                 # send difference Image and Image header to Helper
                 client.sendImage(msg, diffBytes)
-
 
             # update currScreen as newScreen
             currScreen = newScreen

@@ -7,6 +7,7 @@ from AsymmetricEncryption import RSA_cipher
 from SymmetricEncryption import AES_hash_cipher
 
 
+# class to communicate as client with server
 class Client_comm:
     def __init__(self, serverIP: str, port: int, recv_q):
         """
@@ -120,6 +121,9 @@ class Client_comm:
                 sys.exit("server is down, try again later")
 
     def exchangeStatus(self):
+        """
+        Function returns True if shared key has already been created and key exchange has completed and False otherwise
+        """
         return self.sharedKey is not None
 
     def close(self):

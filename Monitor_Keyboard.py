@@ -4,16 +4,18 @@ from pynput.keyboard import Key
 import Helper_protocol
 import time
 
+
 # class to monitor keyboard
 class Keyboard_monitor:
     def __init__(self, server, clientIP: str, close_queue):
         """
-        builder function creates new Keyboard_monitor object with the vars gotten and calls function _monitor_keyboard
+        Builder function creates new Keyboard_monitor object with the vars gotten and calls function _monitor_keyboard
         :param server: server to send keyboard data through
         :param clientIP: client ip to send keyboard data too
         """
         self.server = server
         self.clientIP = clientIP
+        # values for keys who do not have values in pynput
         self.special_keys_mapping = {Key.ctrl_l: 1114112,
                                      Key.ctrl_r: 1114113,
                                      Key.shift_l: 1114114,
@@ -63,18 +65,25 @@ class Keyboard_monitor:
         self._monitor_keyboard()
 
     def pressed_end(self):
+        """
+        Function is called when combination Shift + Ctrl + d is pressed, send data to client based on protocol and
+        release Shift Ctrl and d
+        """
         # release shift ctrl and d
         self.server.send(self.clientIP, Helper_protocol.pack_key_release("9999999"))
         self.stop_listening()
 
+        # wait 0.1 seconds for client to recieve end msg then place close in close_queue to let client know
+        # to terminate all proccesses
         time.sleep(0.1)
         self.close_queue.put("close")
 
     def _monitor_keyboard(self):
         """
-        function monitors and listens to keyboard clicks and releases and calls functions accordingly
+        Function monitors and listens to keyboard clicks and releases and calls functions accordingly
         """
         self.listener = keyboard.Listener(on_press=self._on_press, on_release=self._on_release)
+        # add hotkey for end session combination and function for it
         Keyboard.add_hotkey("ctrl+shift+d", self.pressed_end)
         self.listener.start()
 
@@ -88,7 +97,7 @@ class Keyboard_monitor:
     def _on_press(self, key):
         """
         Function is called when key is pressed, and checks if key is a special key or not and sends value of
-         key based on protocol and special keys mapping
+        key based on protocol and special keys mapping
         :param key: key pressed on keyboard
         """
 

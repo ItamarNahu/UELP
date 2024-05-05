@@ -6,11 +6,11 @@ from SymmetricEncryption import AES_hash_cipher
 import Helper_protocol
 
 
+# class to communicate and work with clients of multiclient server
 class Server_comm:
-
     def __init__(self, recv_q, port: int, bindIP: str = None):
         """
-        builder method creates a new "Server_comm" object with a Queue, port and bindIP
+        Builder method creates a new "Server_comm" object with a Queue, port and bindIP
         :param recv_q: Queue for messages to the logic
         :param port: port that server will run on
         :param bindIP: IP that server will check if it uses port 2001, 2002, 2003
@@ -26,7 +26,7 @@ class Server_comm:
 
     def _main_loop(self):
         """
-        function runs server main loop, connects clients creates shared keys with them and gets msgs from them
+        Function runs server main loop, connects clients creates shared keys with them and gets msgs from them
          and encrypts them for logic
         """
 
@@ -69,7 +69,7 @@ class Server_comm:
 
     def _get_shared_key(self, clientIP: str, curSocket):
         """
-        function sends servers public key to new client and gets and saves the shared key of server and client
+        Function sends servers public key to new client and gets and saves the shared key of server and client
         :param clientIP: ip of client to create shared key with
         :param curSocket: socket of client to create shared key with
         """
@@ -91,7 +91,7 @@ class Server_comm:
 
     def send(self, ip: str, msg: str):
         """
-        send encrypted data to certain client
+        Send encrypted data to certain client
         :param ip: ip of client to send msg too
         :param msg: msg to send to client
         """
@@ -110,16 +110,16 @@ class Server_comm:
 
     def _disconnect_client(self, client):
         """
-        function disconnects client from server, by closing socket and removing from dics
+        Function disconnects client from server, by closing socket and removing from dictionarys
         :param client: socket of client to disconnect
-        :return:nothing
+        :return: nothing
         """
         # if client in open_clients remove him and tell logic by sending disconnect
         if client in self.open_clients.keys() and self.recv_q:
             print(f"{self.open_clients[client]} - disconnect")
             self.recv_q.put(("disconnect", self.open_clients[client][0]))
-            if (self.port == 2001 or self.port == 2002 or self.port == 2003) and self.open_clients[client][
-                0] == self.bindIP:
+            if (self.port == 2001 or self.port == 2002 or self.port == 2003) and self.open_clients[client][0]\
+                    == self.bindIP:
                 self.close_server()
             del self.open_clients[client]
         client.close()
@@ -139,20 +139,20 @@ class Server_comm:
 
     def close_server(self):
         """
-        end main loop
+        End main loop
         """
         self.is_running = False
 
     def is_running(self):
         """
-        check if server is running
+        Check if server is running
         :return: True or False if server is running
         """
         return self.is_running
 
     def closeClient(self, clientIP: str):
         """
-        function closes a client
+        Function closes a client
         :param clientIP: ip of client to close
         """
         client = self._find_socket_by_ip(clientIP)
@@ -162,7 +162,8 @@ class Server_comm:
 
     def _recvImage(self, client, data: str):
         """
-        Function is called when port is screen port and data was gotten from client of bindIP
+        Function is called when port is screen port and data was gotten from client of bindIP meaning
+         this is a screen server and an Image is being recieved after data gotten
         :param client: client gotten data from
         :param data: data gotten from client for screen
         """

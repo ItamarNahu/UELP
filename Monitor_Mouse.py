@@ -7,7 +7,7 @@ import queue
 class Mouse_monitor:
     def __init__(self, server, clientIP: str):
         """
-        builder function creates new Mouse_monitor object to monitor mouse functions
+        Builder function creates new Mouse_monitor object to monitor mouse functions
         :param server: server to send through data about mouse
         :param clientIP: ip of client to send mouse data too
         """
@@ -19,7 +19,7 @@ class Mouse_monitor:
 
     def _monitor_mouse(self):
         """
-        function creates a new listener for the mouse to listen for scroll clicks and movement
+        Function creates a new listener for the mouse to listen for scroll clicks and movement
         """
         self.listener = pynput.mouse.Listener(on_move=self._on_move, on_click=self._on_click,
                                               on_scroll=self._on_scroll)
@@ -34,7 +34,7 @@ class Mouse_monitor:
 
     def _on_move(self, x: int, y: int):
         """
-        function called when listener detects new pos of mouse and sends the pos to client by protocol
+        Function called when listener detects new pos of mouse and sends the pos to client by protocol
         :param x: x loc of mouse
         :param y: y loc of mouse
         """
@@ -42,7 +42,7 @@ class Mouse_monitor:
 
     def _on_click(self, x: int, y: int, button, pressed):
         """
-        function checks if mouse clicked and sends gotten data to client by protocol
+        Function checks if mouse clicked and sends gotten data to client by protocol
         :param x: x pos of mouse click
         :param y: y pos of mouse click
         :param button: button to check mouse type click
@@ -50,20 +50,24 @@ class Mouse_monitor:
         """
         msg = str(x).zfill(4) + str(y).zfill(4)
         if button == pynput.mouse.Button.left:
+            # check if button was pressed or released and add to protocol accordingly
             if pressed:
                 msg += "0"
             else:
                 msg += "5"
         elif button == pynput.mouse.Button.right:
+            # check if button was pressed or released and add to protocol accordingly
             if pressed:
                 msg += "1"
             else:
                 msg += "6"
+
+        # send data to client by protocol
         self.server.send(self.clientIP, msg)
 
     def _on_scroll(self, x: int, y: int, dx: int, dy: int):
         """
-        function checks and listens to mouse scroll wheel and sends to client data if mouse scrolled by protocol
+        Function checks and listens to mouse scroll wheel and sends to client data if mouse scrolled by protocol
         :param x: x pos of mouse scroll
         :param y: y pos of mouse scroll
         :param dx: added x for mouse scroll
@@ -74,8 +78,9 @@ class Mouse_monitor:
             msg += "2"
         else:
             msg += "3"
-        self.server.send(self.clientIP, msg)
 
+        # send data to client by protocol
+        self.server.send(self.clientIP, msg)
 
 
 if __name__ == '__main__':

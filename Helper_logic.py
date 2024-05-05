@@ -23,4 +23,3 @@ def main_Helper(otherIP, port, close_queue):
     elif port == 2002:
         keyboard = Keyboard_monitor(server, otherIP, close_queue)
         threading.Thread(target=check, args=(check_queue, keyboard,)).start()
-
