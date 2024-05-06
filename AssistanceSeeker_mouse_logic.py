@@ -4,14 +4,22 @@ from pynput import mouse
 
 
 def main_AS_mouse(otherIP):
+    """
+    main loop for getting mouse data from Helper mouse, get data unpack it and change mouse control accordingly
+    :param otherIP: ip of Helper server getting mouse data from
+    """
     port = 2001
     recv_q = queue.Queue()
     client = Client_comm(otherIP, port, recv_q)
+
+    # Computer mouse control object
     mouse_cont = mouse.Controller()
-    # get mouse pos and funcs from queue
+
+    # get mouse pos and other functions from queue
     while True:
         data = recv_q.get()
         if data != "close":
+            # unpack mouse pos and type of function mouse has to do
             x = data[:4]
             y = data[4:-1]
             type_mov = data[-1]

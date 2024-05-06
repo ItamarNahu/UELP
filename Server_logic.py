@@ -13,7 +13,6 @@ def handleMsgs(server, recv_q):
      and calls function by opcode
     :param server: server object to communicate with server
     :param recv_q: servers msgs queue
-    :return: nothing
     """
     # create database object to communicate with database
     db = Database_comm()
@@ -36,7 +35,6 @@ def handleExpired(server, expired_q):
      ip goten
     :param server: server object to communicate with server
     :param expired_q: queue that has ips of users with expired session codes
-    :return: nothing
     """
     while True:
         ip = expired_q.get()
@@ -50,7 +48,6 @@ def handle_mac_addr(clientIP, db, server, params):
     :param db: database object to communicate with database
     :param server: server object to communicate with server
     :param params: list of paramaters gotten with opcode from user
-    :return: nothing
     """
     mac_addr = params[0]
 
@@ -65,7 +62,6 @@ def handle_login(clientIP, db, server, params):
     :param db: database object to communicate with database
     :param server: server object to communicate with server
     :param params: list of paramaters gotten with opcode from user
-    :return: nothing
     """
     username = params[0]
     password = params[1]
@@ -98,7 +94,6 @@ def handle_signup(clientIP, db, server, params):
     :param db: database object to communicate with database
     :param server: server object to communicate with server
     :param params: list of paramaters gotten with opcode from user
-    :return: nothing
     """
     username = params[0]
     password = params[1]
@@ -140,7 +135,6 @@ def handle_typeUser(clientIP, db, server, params):
     :param db: database object to communicate with database
     :param server: server object to communicate with server
     :param params: list of paramaters gotten with opcode from user
-    :return: nothing
     """
     typeUser = params[0]
     # mac gotten from sending arp request to users ip
@@ -174,7 +168,6 @@ def handle_getCode(clientIP, db, server, params):
     :param db: database object to communicate with database
     :param server: server object to communicate with server
     :param params: list of paramaters gotten with opcode from user
-    :return: nothing
     """
     if users[clientIP][1] == "H":
         msg = Protocol.pack_getcode_ans(codes.createCode(clientIP))
@@ -188,7 +181,6 @@ def handle_codeCheck(clientIP, db, server, params):
     :param db: database object to communicate with database
     :param server: server object to communicate with server
     :param params: list of paramaters gotten with opcode from user
-    :return: nothing
     """
     userCode = params[0]
 
@@ -210,7 +202,6 @@ def disconnectClient(clientIP, server):
     Function removes client from users dic and closes the users socket from server
     :param clientIP: ip of user to disconnect from server
     :param server: server object to communicate with server
-    :return: nothing
     """
     if clientIP in users.keys():
         del users[clientIP]

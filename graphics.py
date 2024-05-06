@@ -5,12 +5,21 @@ from pubsub import pub
 import re
 import pyperclip
 
+
 class MyFrame(wx.Frame):
     def __init__(self, comm, parent=None):
+        """
+
+        :param comm: client object to comm with server
+        :param parent: parant panel
+        """
         super(MyFrame, self).__init__(parent, title="UELP")
         self.Maximize()
         self.client = comm
+
+        # set icon
         self.SetIcon(wx.Icon("logo.png", wx.BITMAP_TYPE_PNG))
+
         # create main panel - to put on the others panels
         self.main_panel = MainPanel(self)
         box = wx.BoxSizer(wx.VERTICAL)
@@ -23,11 +32,15 @@ class MyFrame(wx.Frame):
 
 class MainPanel(wx.Panel):
     def __init__(self, parent):
+        """
+        Initialize Main  panel all other panels are put on
+        :param parent: Parent panel
+        """
         wx.Panel.__init__(self, parent)
         self.frame = parent
         self.SetBackgroundColour("#fcf6f5")
         v_box = wx.BoxSizer(wx.VERTICAL)
-        # create object for each panel
+        # create object for each panel to switch between
         self.login = LoginPanel(self, self.frame)
         v_box.Add(self.login)
         self.signup = SignUpPanel(self, self.frame)
@@ -40,11 +53,19 @@ class MainPanel(wx.Panel):
         v_box.Add(self.Assistance_seeker)
         self.connecting = ConnectingPanel(self, self.frame)
         v_box.Add(self.connecting)
+
+        # show first panel - login
         self.login.Show()
+
         self.SetSizer(v_box)
         self.Layout()
 
     def change_screen(self, cur_screen, screen):
+        """
+        Function changes panel currently viewed
+        :param cur_screen: current panel viewed
+        :param screen: new Panel to view
+        """
         cur_screen.Hide()
         screen.Show()
         self.Layout()
@@ -52,58 +73,84 @@ class MainPanel(wx.Panel):
 
 class LoginPanel(wx.Panel):
     def __init__(self, parent, frame):
+        """
+        Login screen panel
+        :param parent: Parent panel
+        :param frame: Frame parent
+        """
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
         self.SetBackgroundColour("#fdf0d0")
+
         sizer = wx.BoxSizer(wx.VERTICAL)
 
+        # initialize title on panel
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
         title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
 
+        # initialize about button on panel
         self.about = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap("info.png"), pos=(1850, 5))
         self.about.Bind(wx.EVT_LEFT_DOWN, self.show_info_dialog)
 
+        # initialize signin title on panel
         signin = wx.StaticText(self, -1, label="Sign In", pos=(720, 100))
         signinFont = wx.Font(125, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
         signin.SetFont(signinFont)
         signin.SetForegroundColour("#3f4043")
 
+        # initialize username textctrl on panel
         self.nameField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(600, 100))
         self.nameField.SetFont(wx.Font(65, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
         self.set_placeholder_text(self.nameField, "Username")
-        # Adding the image to the left of the nameField
+
+        # Add username image to the left of the nameField
         wx.StaticBitmap(self, -1, wx.Bitmap("user.png"), pos=(550, 365))
 
-        self.nameField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
+        # bind text change event to function for username textctrl
+        self.nameField.Bind(wx.EVT_TEXT, self.on_text_change)
 
+        # initialize password textctrl on panel
         self.passField = wx.TextCtrl(self, -1, style=wx.TE_PASSWORD, size=(600, 100))
         self.passField.SetFont(wx.Font(50, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
         self.set_placeholder_text(self.passField, "a12fgtegp")
-        wx.StaticBitmap(self, -1, wx.Bitmap("pass.png"), pos=(550, 502))
-        self.passField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
 
-        # next acting as a button
+        # Add password image to the left of the nameField
+        wx.StaticBitmap(self, -1, wx.Bitmap("pass.png"), pos=(550, 502))
+
+        # bind text change event to function for password textctrl
+        self.passField.Bind(wx.EVT_TEXT, self.on_text_change)
+
+        # initialize login button bitmaps and the static bitmap acting as the button
         self.login_bitmap = wx.Bitmap("login.png")
         self.login_off_bitmap = wx.Bitmap("login_off.png")
         self.next = wx.StaticBitmap(self, wx.ID_ANY, self.login_off_bitmap)
         self.next.Bind(wx.EVT_LEFT_DOWN, self.on_next_click)
         self.can_press = False
 
-        self.signup_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # set sizer for switching to signup panel elements
+        signup_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # initialize no account text to panel
         no_account = wx.StaticText(self, -1, label="Dont have an account?")
         no_account_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         no_account.SetFont(no_account_font)
+
+        # initialize signup text so can be pressed to switch to signup panel
         self.signup = wx.StaticText(self, -1, label="Sign Up")
         signup_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, True, "Calisto MT")
         self.signup.Bind(wx.EVT_LEFT_DOWN, self.handle_signup_screen)
         self.signup.SetFont(signup_font)
         self.signup.SetForegroundColour("#0000FF")
-        self.signup_sizer.Add(no_account, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
-        self.signup_sizer.AddSpacer(8)
-        self.signup_sizer.Add(self.signup, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+
+        # add all text to signup sizer
+        signup_sizer.Add(no_account, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        signup_sizer.AddSpacer(8)
+        signup_sizer.Add(self.signup, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+
+        # create list of all interactive elemnts to disable/enable when needed
         self.interactive_elements = [self.nameField, self.passField, self.next]
 
         # Add all elements to sizer
@@ -114,19 +161,28 @@ class LoginPanel(wx.Panel):
         sizer.Add(self.passField, 0, wx.CENTER, 5)
         sizer.AddSpacer(110)
         sizer.Add(self.next, 0, wx.CENTER, 5)
-        sizer.Add(self.signup_sizer, 0, wx.CENTER, 5)
+        sizer.Add(signup_sizer, 0, wx.CENTER, 5)
 
-        # Add logo at the bottom right
+        # Add logo at the bottom right of screen
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
 
         # Arrange the screen
         self.SetSizer(sizer)
         self.Layout()
         self.Hide()
+
+        # invalidText shown when gotten negetive answer and need to show on screen
         self.invalidText = None
+
         pub.subscribe(self.handle_login_ans, "login_ans")
 
     def handle_login_ans(self, ans):
+        """
+        Function called when gotten login request ans from server, act accordingly
+         (change screen or let user know login incorrect)
+        :param ans: answer to login request user sent
+        """
+
         if ans == "1":
             self.show_invalid_message("Username or password incorrect", 2000)
         elif ans == "2":
@@ -135,37 +191,64 @@ class LoginPanel(wx.Panel):
             self.parent.change_screen(self, self.parent.select)
 
     def show_invalid_message(self, msg, time):
-
-        # Show red text message for 5 seconds
+        """
+        Function shows invalid message on screen for certain time
+        :param msg: msg to show on screen
+        :param time: amount of time to show message on screen
+        """
+        # Set invalid text as msg gotten
         self.invalidText = wx.StaticText(self, label=msg, style=wx.ALIGN_CENTER)
         self.invalidText.SetForegroundColour(wx.RED)
         self.invalidText.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
+
+        # place invalid text in right position in sizer
         sizer = self.GetSizer()
         sizer.Insert(sizer.GetItemCount(), self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
 
+        # disable interactive elements so user has to view invalid text for certain time
         self.disable_interactive_elements()
         self.Layout()
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        # start timer for certain time gotten
         self.timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
-        # Remove the invalid message after certain time
+        """
+        Function called when timer ends and erases invalid text currently seen
+        :param event: event for time
+        """
+        # Remove the invalid message if still exists
         if self.invalidText is not None:
             self.invalidText.Destroy()
             self.Layout()
             self.enable_interactive_elements()
 
     def set_placeholder_text(self, text_ctrl, placeholder):
+        """
+        Function called to set certain placeholder text in textctrl and bind focus and unfocus events for textctrl
+        :param text_ctrl: text_ctrl to place text in
+        :param placeholder: text to place in text ctrl
+        """
         text_ctrl.SetValue(placeholder)
-        text_ctrl.SetForegroundColour('#808080')  # Set text color to grey
-        text_ctrl.SetDefaultStyle(wx.TextAttr(wx.NullColour, wx.NullColour))  # Reset text style
+        # Set text color to grey
+        text_ctrl.SetForegroundColour('#808080')
+        # Reset text style
+        text_ctrl.SetDefaultStyle(wx.TextAttr(wx.NullColour, wx.NullColour))
+
+        # bind focus events to textctrl
         text_ctrl.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
         text_ctrl.Bind(wx.EVT_KILL_FOCUS, self.on_kill_focus)
 
     def on_set_focus(self, event):
+        """
+        Function called when text ctrl is focused on, if placeholder texts for textctrls are there then
+        empty text ctrl and change text color
+        :param event: event of focus
+        """
         ctrl = event.GetEventObject()
+
         if ctrl.GetValue() == "Username" or ctrl.GetValue() == "a12fgtegp":
             ctrl.SetValue("")
             ctrl.SetForegroundColour(wx.BLACK)
@@ -173,7 +256,13 @@ class LoginPanel(wx.Panel):
         event.Skip()
 
     def on_kill_focus(self, event):
+        """
+        Function called when text ctrl is not focused on, if text ctrl is empty set text in textctrl to placeholder
+        text and change text color
+        :param event: event of kill focus
+        """
         ctrl = event.GetEventObject()
+
         if ctrl.IsEmpty():
             if ctrl == self.nameField:
                 ctrl.SetValue("Username")
@@ -183,9 +272,17 @@ class LoginPanel(wx.Panel):
         event.Skip()
 
     def on_text_change(self, event):
+        """
+        Function called when text in text ctrl is changed and checks if text fit criteria for pressing/not pressing
+        login button and changes boolean value accordingly
+        :param event: event of text change
+        """
         username = self.nameField.GetValue()
         password = self.passField.GetValue()
+
+        # if text in username and password textctrl isn't placeholder text and both are not empty can press button
         if not username or not password or username == "Username" or password == "a12fgtegp":
+            # change bitmap of button and boolean value if can press button
             self.next.SetBitmap(self.login_off_bitmap)
             self.can_press = False
         elif not self.can_press:
@@ -193,13 +290,23 @@ class LoginPanel(wx.Panel):
             self.can_press = True
 
     def on_next_click(self, event):
+        """
+        Function called when login button pressed, function checks if user can press button
+        and packs username and password gotten from user by protocol and sends to server
+        :param event: event of button click
+        """
         username = self.nameField.GetValue()
         password = self.passField.GetValue()
+
         if self.can_press:
             msg2send = Client_protocol.pack_login_info(username, password)
             self.frame.client.send(msg2send)
 
     def show_info_dialog(self, event):
+        """
+        Function called when info button pressed, show info on system
+        :param event: event of info click
+        """
         info = wx.adv.AboutDialogInfo()
         info.SetName("Itamar system")
         info.SetDescription("This system allow you to Control and help friends computer from your own")
@@ -213,11 +320,21 @@ class LoginPanel(wx.Panel):
         wx.adv.AboutBox(info)
 
     def handle_signup_screen(self, event):
+        """
+        Function called when signup text pressed, change screen to signup panel
+        :param event: event of signup screen click
+        """
         self.parent.change_screen(self, self.parent.signup)
 
     def _check_password(self, password):
+        """
+        Function checks password user entered
+        :param password: password gotten from user
+        """
         pattern = r'[^a-zA-Z0-9\s]'
         is_ok = True
+        # password must have at least 8 characters one uppercase letter and one special character,
+        # show invalid message accordingly
         if len(password) < 8:
             self.show_invalid_message("Password should be 8 characters and up", 2000)
             is_ok = False
@@ -231,65 +348,95 @@ class LoginPanel(wx.Panel):
         return is_ok
 
     def disable_interactive_elements(self):
+        """
+        Function disables all interactive elements in interactive elements list
+        """
         for element in self.interactive_elements:
             element.Disable()
 
     def enable_interactive_elements(self):
+        """
+        Function enables all interactive elements in interactive elements list
+        """
         for element in self.interactive_elements:
             element.Enable()
 
 
 class SignUpPanel(wx.Panel):
     def __init__(self, parent, frame):
+        """
+        Signup screen panel
+        :param parent: parent panel
+        :param frame: frame parent
+        """
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
         self.SetBackgroundColour("#fdf0d0")
         sizer = wx.BoxSizer(wx.VERTICAL)
 
+        # initialize title on panel
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
         title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
 
+        # initialize signup title on panel
         signup = wx.StaticText(self, -1, label="Sign Up", pos=(705, 100))
         signupFont = wx.Font(125, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
         signup.SetFont(signupFont)
         signup.SetForegroundColour("#3f4043")
 
+        # initialize username textctrl on panel
         self.nameField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(600, 100))
         self.nameField.SetFont(wx.Font(65, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
         self.set_placeholder_text(self.nameField, "Username")
-        # Adding the image to the left of the nameField
+
+        # Add username image to the left of the nameField
         wx.StaticBitmap(self, -1, wx.Bitmap("user.png"), pos=(550, 365))
 
-        self.nameField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
+        # bind text change event to function for username textctrl
+        self.nameField.Bind(wx.EVT_TEXT, self.on_text_change)
 
+        # initialize password textctrl on panel
         self.passField = wx.TextCtrl(self, -1, style=wx.TE_PASSWORD, size=(600, 100))
         self.passField.SetFont(wx.Font(50, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
         self.set_placeholder_text(self.passField, "a12fgtegp")
+
+        # Add password image to the left of the nameField
         wx.StaticBitmap(self, -1, wx.Bitmap("pass.png"), pos=(550, 502))
+
+        # bind text change event to function for password textctrl
         self.passField.Bind(wx.EVT_TEXT, self.on_text_change)  # Bind text change event
 
-        # next acting as a button
+        # initialize signup button bitmaps and the static bitmap acting as the button
         self.signup_bitmap = wx.Bitmap("signup.png")
         self.signup_off_bitmap = wx.Bitmap("signup_off.png")
         self.next = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap("signup_off.png"))
         self.next.Bind(wx.EVT_LEFT_DOWN, self.on_next_click)
         self.can_press = False
 
-        self.signup_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # set sizer for switching to signin panel elements
+        signin_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # initialize have account text to panel
         have_account = wx.StaticText(self, -1, label="Already have an account?")
         have_account_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         have_account.SetFont(have_account_font)
+
+        # initialize text acting as button to switch to login panel
         self.login = wx.StaticText(self, -1, label="Login")
-        signup_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, True, "Calisto MT")
+        signin_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, True, "Calisto MT")
         self.login.Bind(wx.EVT_LEFT_DOWN, self.handle_signin_screen)
-        self.login.SetFont(signup_font)
+        self.login.SetFont(signin_font)
         self.login.SetForegroundColour("#0000FF")
-        self.signup_sizer.Add(have_account, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
-        self.signup_sizer.AddSpacer(8)
-        self.signup_sizer.Add(self.login, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+
+        # add elements to sizer
+        signin_sizer.Add(have_account, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        signin_sizer.AddSpacer(8)
+        signin_sizer.Add(self.login, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+
+        # create list of all interactive elemnts to disable/enable when needed
         self.interactive_elements = [self.nameField, self.passField, self.next]
 
         # Add all elements to sizer
@@ -300,57 +447,93 @@ class SignUpPanel(wx.Panel):
         sizer.Add(self.passField, 0, wx.CENTER, 5)
         sizer.AddSpacer(110)
         sizer.Add(self.next, 0, wx.CENTER, 5)
-        sizer.Add(self.signup_sizer, 0, wx.CENTER, 5)
+        sizer.Add(signin_sizer, 0, wx.CENTER, 5)
 
-        # Add logo at the bottom right
+        # Add logo at the bottom right of panel
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
 
         # Arrange the screen
         self.SetSizer(sizer)
         self.Layout()
         self.Hide()
+
+        # invalidText shown when gotten negetive answer and need to show on screen
         self.invalidText = None
+
         pub.subscribe(self.handle_signup_ans, "signup_ans")
 
     def handle_signup_ans(self, ans):
+        """
+        Function called when gotten signup request ans from server, act accordingly
+        (change screen or let user know signup incorrect)
+        :param ans: answer to signup request user sent
+        """
         if not ans:
             self.show_invalid_message("Username already taken", 2000)
         else:
             self.parent.change_screen(self, self.parent.select)
 
     def show_invalid_message(self, msg, time):
-
-        # Show red text message for 5 seconds
+        """
+        Function shows invalid message on screen for certain time
+        :param msg: msg to show on screen
+        :param time: amount of time to show message on screen
+        """
+        # Set invalid text as msg gotten
         self.invalidText = wx.StaticText(self, label=msg, style=wx.ALIGN_CENTER)
         self.invalidText.SetForegroundColour(wx.RED)
         self.invalidText.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
 
+        # place invalid text in right position in sizer
         sizer = self.GetSizer()
         sizer.Insert(sizer.GetItemCount(), self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
 
+        # disable interactive elements so user has to view invalid text for certain time
         self.disable_interactive_elements()
         self.Layout()
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        # start timer for certain time gotten
         self.timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
-        # Remove the invalid message after certain time
+        """
+        Function called when timer ends and erases invalid text currently seen
+        :param event: event for time
+        """
+        # Remove the invalid message if still exists
         if self.invalidText is not None:
             self.invalidText.Destroy()
             self.Layout()
             self.enable_interactive_elements()
 
     def set_placeholder_text(self, text_ctrl, placeholder):
+        """
+        Function called to set certain placeholder text in textctrl and bind focus and unfocus events for textctrl
+        :param text_ctrl: text_ctrl to place text in
+        :param placeholder: text to place in text ctrl
+        """
         text_ctrl.SetValue(placeholder)
-        text_ctrl.SetForegroundColour('#808080')  # Set text color to grey
-        text_ctrl.SetDefaultStyle(wx.TextAttr(wx.NullColour, wx.NullColour))  # Reset text style
+
+        # Set text color to grey
+        text_ctrl.SetForegroundColour('#808080')
+
+        # Reset text style
+        text_ctrl.SetDefaultStyle(wx.TextAttr(wx.NullColour, wx.NullColour))
+
+        # bind focus events to textctrl
         text_ctrl.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
         text_ctrl.Bind(wx.EVT_KILL_FOCUS, self.on_kill_focus)
 
     def on_set_focus(self, event):
+        """
+        Function called when text ctrl is focused on, if placeholder texts for textctrls are there then
+        empty text ctrl and change text color
+        :param event: event of focus
+        """
         ctrl = event.GetEventObject()
+
         if ctrl.GetValue() == "Username" or ctrl.GetValue() == "a12fgtegp":
             ctrl.SetValue("")
             ctrl.SetForegroundColour(wx.BLACK)
@@ -358,19 +541,34 @@ class SignUpPanel(wx.Panel):
         event.Skip()
 
     def on_kill_focus(self, event):
+        """
+        Function called when text ctrl is not focused on, if text ctrl is empty set text in textctrl to placeholder
+        text and change text color
+        :param event: event of kill focus
+        """
         ctrl = event.GetEventObject()
+
         if ctrl.IsEmpty():
             if ctrl == self.nameField:
                 ctrl.SetValue("Username")
             elif ctrl == self.passField:
                 ctrl.SetValue("a12fgtegp")
-            ctrl.SetForegroundColour('#808080')  # Set text color to grey
+            # Set text color to grey
+            ctrl.SetForegroundColour('#808080')
         event.Skip()
 
     def on_text_change(self, event):
+        """
+        Function called when text in text ctrl is changed and checks if text fit criteria for pressing/not pressing
+        signup button and changes boolean value accordingly
+        :param event: event of text change
+        """
         username = self.nameField.GetValue()
         password = self.passField.GetValue()
+
+        # if text in username and password textctrl isn't placeholder text and both are not empty can press button
         if not username or not password or username == "Username" or password == "a12fgtegp":
+            # change bitmap of button and boolean value if can press button
             self.next.SetBitmap(self.signup_off_bitmap)
             self.can_press = False
         elif not self.can_press:
@@ -378,18 +576,35 @@ class SignUpPanel(wx.Panel):
             self.can_press = True
 
     def on_next_click(self, event):
+        """
+        Function called when signup button pressed, function checks if user can press button
+        and packs username and password gotten from user by protocol and sends to server
+        :param event: event of button click
+        """
         username = self.nameField.GetValue()
         password = self.passField.GetValue()
+
         if self.can_press and self._check_password(password):
             msg2send = Client_protocol.pack_signup_info(username, password)
             self.frame.client.send(msg2send)
 
     def handle_signin_screen(self, event):
+        """
+        Function called when signin text pressed, change screen to signup panel
+        :param event: event of signup screen click
+        """
         self.parent.change_screen(self, self.parent.login)
 
     def _check_password(self, password):
+        """
+        Function checks password user entered
+        :param password: password gotten from user
+        """
         pattern = r'[^a-zA-Z0-9\s]'
         is_ok = True
+
+        # password must have at least 8 characters one uppercase letter and one special character,
+        # show invalid message accordingly
         if len(password) < 8:
             self.show_invalid_message("Password should be 8 characters and up", 2000)
             is_ok = False
@@ -403,47 +618,67 @@ class SignUpPanel(wx.Panel):
         return is_ok
 
     def disable_interactive_elements(self):
+        """
+        Function disables all interactive elements in interactive elements list
+        """
         for element in self.interactive_elements:
             element.Disable()
 
     def enable_interactive_elements(self):
+        """
+        Function enables all interactive elements in interactive elements list
+        """
         for element in self.interactive_elements:
             element.Enable()
 
 
 class SelectUserPanel(wx.Panel):
     def __init__(self, parent, frame):
+        """
+        Select user panel
+        :param parent: Parent panel
+        :param frame: frame parent
+        """
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
         self.SetBackgroundColour("#fdf0d0")
 
         sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # initialize title on panel
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
         title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
 
+        # Initialize select user text on panel
         select = wx.StaticText(self, -1, label="Select User Type")
         selectfont = wx.Font(55, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
         select.SetFont(selectfont)
         select.SetForegroundColour("#3f4043")
 
-        # Helper & Assistance Seeker buttons
+        # Initialize sizer for Helper & Assistance Seeker buttons
         btnBox = wx.BoxSizer(wx.HORIZONTAL)
 
+        # Initialize helper static bitmap button on panel, bind to hover and pressing events
         self.helper = wx.StaticBitmap(self, -1, wx.Bitmap("Helper_choose.png"))
         self.helper.Bind(wx.EVT_ENTER_WINDOW, self.on_hover)
         self.helper.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave)
-        self.helper.Bind(wx.EVT_LEFT_DOWN, self.handle_helper)  # Bind left click event
-        self.helper.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)  # Mark this bitmap as helper
+        self.helper.Bind(wx.EVT_LEFT_DOWN, self.handle_helper)
 
+        # Mark this bitmap as window variant to differ helper from Assistance Seeker button
+        self.helper.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+
+        # Initialize Assistance Seeker static bitmap button on panel, bind to hover and pressing events
         self.As = wx.StaticBitmap(self, -1, wx.Bitmap("assistance_seeker.png"))
         self.As.Bind(wx.EVT_ENTER_WINDOW, self.on_hover)
         self.As.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave)
         self.As.Bind(wx.EVT_LEFT_DOWN, self.handle_AS)  # Bind left click event
-        self.As.SetWindowVariant(wx.WINDOW_VARIANT_NORMAL)  # Mark this bitmap as assistance seeker
+        # Mark this bitmap as window variant to differ Assistance seeker from Helper button
+        self.As.SetWindowVariant(wx.WINDOW_VARIANT_NORMAL)
 
+        # Add elements to sizer
         btnBox.Add(self.helper, 0, wx.Center, 5)
         btnBox.AddSpacer(150)
         btnBox.Add(self.As, 0, wx.Center)
@@ -454,7 +689,7 @@ class SelectUserPanel(wx.Panel):
         sizer.AddSpacer(20)
         sizer.Add(btnBox, wx.CENTER | wx.ALL, 5)
 
-        # Add logo at the bottom right
+        # Add logo at the bottom right of panel
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
 
         # Arrange the screen
@@ -463,11 +698,16 @@ class SelectUserPanel(wx.Panel):
         self.Hide()
         self.invalidText = None
         self.userType = None
-        self.interactive_elements = [self.As, self.helper]
+
         pub.subscribe(self.handle_typeUser_ans, "typeUser_ans")
 
     def on_hover(self, event):
+        """
+        Function called when button hovered on, change bitmap of button accordingly to hover bitmap
+        :param event: event of button of hover
+        """
         bitmap = event.GetEventObject()
+        # check which button gotten, AS or Helper
         if bitmap.GetWindowVariant() == wx.WINDOW_VARIANT_SMALL:
             bitmap.SetBitmap(wx.Bitmap("Helper_choose_hover.png"))
         else:
@@ -475,7 +715,12 @@ class SelectUserPanel(wx.Panel):
         event.Skip()
 
     def on_leave(self, event):
+        """
+        Function called when button stops hovered on, change bitmap of button accordingly to normal bitmap
+        :param event: event of button of hover
+        """
         bitmap = event.GetEventObject()
+        # check which button gotten, AS or Helper
         if bitmap.GetWindowVariant() == wx.WINDOW_VARIANT_SMALL:
             bitmap.SetBitmap(wx.Bitmap("Helper_choose.png"))
         else:
@@ -483,10 +728,16 @@ class SelectUserPanel(wx.Panel):
         event.Skip()
 
     def handle_typeUser_ans(self, ans):
+        """
+        Function called when gotten type user request ans from server, act accordingly
+        (change screen or let user know user type pressed invalid based on user type pressed)
+        :param ans: answer to type user request user sent
+        """
         if self.userType == "H":
             if not ans:
                 self.show_invalid_message("You do not have Helper permissions", 2000)
             else:
+                # when changing to helper screen send opcode for getting new code request to server
                 self.parent.change_screen(self, self.parent.helper)
                 self.frame.client.send("03")
 
@@ -497,50 +748,62 @@ class SelectUserPanel(wx.Panel):
                 self.parent.change_screen(self, self.parent.Assistance_seeker)
 
     def handle_helper(self, event):
+        """
+        Function called when helper button pressed, send user type request based on protocol and set user Type asked for
+        :param event: event of button pressed
+        """
         self.userType = "H"
         msg2send = Client_protocol.pack_type_user(self.userType)
         self.frame.client.send(msg2send)
 
     def handle_AS(self, event):
+        """
+        Function called when AS button pressed, send user type request based on protocol and set user Type asked for
+        :param event: event of button pressed
+        """
         self.userType = "A"
         msg2send = Client_protocol.pack_type_user(self.userType)
         self.frame.client.send(msg2send)
 
     def show_invalid_message(self, msg, time):
-        # Show red text message for certain time
+        """
+        Function shows invalid message on screen for certain time
+        :param msg: msg to show on screen
+        :param time: amount of time to show message on screen
+        """
+        # Set invalid text as msg gotten
         self.invalidText = wx.StaticText(self, label=msg, style=wx.ALIGN_CENTER)
         invalidTextfont = wx.Font(48, wx.DECORATIVE, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         self.invalidText.SetFont(invalidTextfont)
         self.invalidText.SetForegroundColour(wx.RED)
 
+        # set invalid text position and hide buttons to press
         self.invalidText.SetPosition((480, 540))
+
+        # hide both buttons to show invalid message
         self.As.Hide()
         self.helper.Hide()
-        self.disable_interactive_elements()
-
         self.Layout()
 
+        # set user type to be None as user type asked for was not gotten
         self.userType = None
+
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        # start timer for certain time gotten
         self.timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
-        # Remove the invalid message after certain time
+        """
+        Function called when timer ends and erases invalid text currently seen
+        :param event: event for time
+        """
+        # Remove the invalid message if still exists and show buttons again
         if self.invalidText is not None:
             self.invalidText.Destroy()
-            self.enable_interactive_elements()
             self.As.Show()
             self.helper.Show()
             self.Layout()
-
-    def disable_interactive_elements(self):
-        for element in self.interactive_elements:
-            element.Disable()
-
-    def enable_interactive_elements(self):
-        for element in self.interactive_elements:
-            element.Enable()
 
 
 class HelperPanel(wx.Panel):

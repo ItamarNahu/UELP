@@ -8,6 +8,12 @@ import AssistanceSeeker_protocol as protocol
 
 
 def check_close(close_queue, client):
+    """
+    Function waits until detected close session combo closes client and puts close in close queue
+    :param close_queue: multiprocessing queue between main client and keyboard process to
+    let main client know when to close session
+    :param client: client object to comm with server
+    """
     while True:
         if Keyboard.is_pressed("shift+ctrl+d"):
             close_queue.put("close")
@@ -16,10 +22,21 @@ def check_close(close_queue, client):
 
 
 def main_AS_keyboard(otherIP, close_queue):
+    """
+    Function controls keyboard click and releases gotten from Helper, unpack data and register
+    key click on computer keyboard
+    :param otherIP: ip of server of Keyboard helper 
+    :param close_queue: multiprocessing queue between main client and keyboard process to
+    let main client know when to close session
+    """
     port = 2002
     recv_q = queue.Queue()
     client = Client_comm(otherIP, port, recv_q)
+
+    # keyboard controller object
     keyboard_cont = keyboard.Controller()
+
+    # values for keys who do not have values in pynput
     special_keys_mapping = {
         1114112: Key.ctrl_l,
         1114113: Key.ctrl_r,
@@ -66,31 +83,39 @@ def main_AS_keyboard(otherIP, close_queue):
         1114154: Key.down,
         1114155: Key.left,
         1114156: Key.right}
+
+    # start thread for checking close session combo and comm with main client
     closed = threading.Thread(target=check_close, args=(close_queue, client,))
     closed.start()
+
     while True:
         data = recv_q.get()
         if data != "close":
             opcode, key_val = protocol.unpackData(data)
             key_val = int(key_val)
+            # gotten end session opcode from Helper, release end session combo and end loop
             if key_val == 9999999:
-                print("released end")
                 keyboard_cont.release(Key.shift)
                 keyboard_cont.release(Key.ctrl)
                 keyboard_cont.release("d")
+                print("released end session combo")
                 break
+            # check if value gotten is registered in special keys and translate to key accordingly
             if key_val in special_keys_mapping.keys():
                 key = special_keys_mapping[key_val]
             else:
+                # add value for keys gotten between 0 and 27 as
+                # these keys are (Ctrl + key) and are not registered correctly in pynput
                 if 0 < key_val < 27:
                     key_val += 96
                 key = chr(key_val)
 
+            # check if key is released or clicked and change computer keyboard accordingly
             if opcode == "01":
-                print(key)
                 keyboard_cont.press(key)
+                print("pressed " + key)
             elif opcode == "02":
                 keyboard_cont.release(key)
-                print(key)
+                print("released " + key)
         else:
             break

@@ -4,7 +4,7 @@ from PIL import Image
 import pygame
 import zlib
 
-# current PIL image
+# global current PIL image on screen
 currScreen = None
 
 
@@ -28,6 +28,11 @@ def build_Screen(top: int, left: int, right: int, bottom: int, img_bytes: bytes)
 
 
 def main_Helper_screen(otherIP):
+    """
+    Main Helper screen, get images from Assistance Seeker client and paste
+     the images based on if are difference or full Images accordingly
+    :param otherIP: ip of Assistance Seeker client getting images from
+    """
     recv_q = queue.Queue()
     port = 2003
     global currScreen
@@ -38,15 +43,16 @@ def main_Helper_screen(otherIP):
     pygame.init()
     screen_info = pygame.display.Info()
     screen_width, screen_height = screen_info.current_w, screen_info.current_h
-    first_image = True
+
+    # wait until gotten first image from Assistance seeker to create pygame screen
+    while True:
+        if not recv_q.empty():
+            screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+            break
 
     while True:
         # get data from client
         if not recv_q.empty():
-            if first_image:
-                screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
-                first_image = False
-
             data, ip = recv_q.get()
             if data == "disconnect":
                 pygame.quit()

@@ -112,13 +112,14 @@ class Server_comm:
         """
         Function disconnects client from server, by closing socket and removing from dictionarys
         :param client: socket of client to disconnect
-        :return: nothing
         """
         # if client in open_clients remove him and tell logic by sending disconnect
         if client in self.open_clients.keys() and self.recv_q:
             print(f"{self.open_clients[client]} - disconnect")
             self.recv_q.put(("disconnect", self.open_clients[client][0]))
-            if (self.port == 2001 or self.port == 2002 or self.port == 2003) and self.open_clients[client][0]\
+            # if client disconnected and the server is keyboard mouse or screen helper server (based on port)
+            # close server as session is closed because Assistance seeker closed client
+            if (self.port == 2001 or self.port == 2002 or self.port == 2003) and self.open_clients[client][0] \
                     == self.bindIP:
                 self.close_server()
             del self.open_clients[client]

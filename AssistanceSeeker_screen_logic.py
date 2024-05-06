@@ -46,6 +46,11 @@ def getChangedPrecentage(bbox, total_pixels: int) -> float:
 
 
 def main_AS_screen(otherIP):
+    """
+    Main Assistance Seeker screen, get new screenshot of screen check if there is difference and
+     send the difference or the full new screenshot accordingly
+    :param otherIP: ip of Helper server to send images too
+    """
     pygame.init()
     screen_info = pygame.display.Info()
     screen_width, screen_height = screen_info.current_w, screen_info.current_h
@@ -54,12 +59,12 @@ def main_AS_screen(otherIP):
 
     client = Client_comm(otherIP, port, recv_q)
 
-    # get first screenshot
+    # get first screenshot and compress the image
     currScreen = ImageGrab.grab()
     currScreen_bytes = currScreen.tobytes()
-
     currScreen_bytes = zlib.compress(currScreen_bytes)
 
+    # wait for client to finish key exchange then send the first image
     while not client.exchangeStatus():
         pass
     # send first screenshot to Helper based on protocol

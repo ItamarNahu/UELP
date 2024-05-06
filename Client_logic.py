@@ -21,7 +21,6 @@ def handleMsgs(client, recv_q):
      and calls function by opcode
     :param client: client object for comm with server
     :param recv_q: queue of msgs gotten from server
-    :return: nothing
     """
     while True:
         data = recv_q.get()
@@ -39,7 +38,6 @@ def send_mac(client):
     """
     Function gets the computers mac and sends it to server by protocol
     :param client: client object for comm with server
-    :return: nothing
     """
     mac_address = ':'.join(['{:02x}'.format((getnode() >> i) & 0xff) for i in range(0, 8 * 6, 8)][::-1])
     client.send(Protocol.pack_mac_addr(mac_address))
@@ -49,7 +47,6 @@ def handle_login_ans(params):
     """
     Function gets the answer of login msg from server and sends the login ans to graphics
     :param params: list of all parameters unpacked and gotten from data from server
-    :return: nothing
     """
     login_ans = params[0]
     wx.CallAfter(pub.sendMessage, "login_ans", ans=login_ans)
@@ -59,7 +56,6 @@ def handle_signup_ans(params):
     """
     Function gets the answer of signup msg from server and sends the signup ans to graphics
     :param params: list of all parameters unpacked and gotten from data from server
-    :return: nothing
     """
     signup_ans = params[0]
     wx.CallAfter(pub.sendMessage, "signup_ans", ans=signup_ans)
@@ -69,7 +65,6 @@ def handle_typeUser_ans(params):
     """
     Function gets the answer of typeUser msg from server and sends the typeUser ans to graphics
     :param params: list of all parameters unpacked and gotten from data from server
-    :return: nothing
     """
     typeUser_ans = params[0]
     wx.CallAfter(pub.sendMessage, "typeUser_ans", ans=typeUser_ans)
@@ -79,7 +74,6 @@ def handle_getCode_ans(params):
     """
     Function gets the answer of getCode msg from server and sends the getCode ans to graphics
     :param params: list of all parameters unpacked and gotten from data from server
-    :return: nothing
     """
     getCode_ans = params[0]
     wx.CallAfter(pub.sendMessage, "gotten_code", ans=getCode_ans)
@@ -89,7 +83,6 @@ def handle_code_ans(params):
     """
     Function gets the answer of code msg from server and sends the code ans to graphics
     :param params: list of all parameters unpacked and gotten from data from server
-    :return: nothing
     """
     code_ans = params[0]
     wx.CallAfter(pub.sendMessage, "code_ans", ans=code_ans)
@@ -100,7 +93,6 @@ def handle_conData(params):
     Function gets connection data of other user to connect too and starts process for mouse keyboard and screen
      accordingly to user type
     :param params: list of all parameters unpacked and gotten from data from server
-    :return: nothing
     """
     otherIP = params[0]
     my_user_Type = params[1]
@@ -144,7 +136,6 @@ def check_closed(close_queue, mouse, screen, keyboard):
     :param mouse: running process of mouse control
     :param screen: running process of screen control
     :param keyboard: running process of keyboard control
-    :return: nothing
     """
     while True:
         data = close_queue.get()
