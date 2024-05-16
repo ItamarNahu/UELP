@@ -1,17 +1,17 @@
-import wx
-import wx.adv
-import Client_protocol
-from pubsub import pub
 import re
 import pyperclip
+import wx
+import wx.adv
+from pubsub import pub
+import Client_protocol
 
 
 class MyFrame(wx.Frame):
     def __init__(self, comm, parent=None):
         """
-
+        Initialize frame
         :param comm: client object to comm with server
-        :param parent: parant panel
+        :param parent: parent panel
         """
         super(MyFrame, self).__init__(parent, title="UELP")
         self.Maximize()
@@ -209,10 +209,10 @@ class LoginPanel(wx.Panel):
         self.disable_interactive_elements()
         self.Layout()
 
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
         # start timer for certain time gotten
-        self.timer.Start(time, oneShot=True)
+        timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
         """
@@ -492,10 +492,10 @@ class SignUpPanel(wx.Panel):
         self.disable_interactive_elements()
         self.Layout()
 
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
         # start timer for certain time gotten
-        self.timer.Start(time, oneShot=True)
+        timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
         """
@@ -788,10 +788,10 @@ class SelectUserPanel(wx.Panel):
         # set user type to be None as user type asked for was not gotten
         self.userType = None
 
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
         # start timer for certain time gotten
-        self.timer.Start(time, oneShot=True)
+        timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
         """
@@ -808,6 +808,11 @@ class SelectUserPanel(wx.Panel):
 
 class HelperPanel(wx.Panel):
     def __init__(self, parent, frame):
+        """
+        Helper user panel
+        :param parent: Parent panel
+        :param frame: frame parent
+        """
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
@@ -815,29 +820,34 @@ class HelperPanel(wx.Panel):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
+        # Initialize title on panel
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
         title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
 
+        # Initialize your code text on panel
         yourcode = wx.StaticText(self, -1, label="Your Code")
         yourcodefont = wx.Font(120, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
         yourcode.SetFont(yourcodefont)
         yourcode.SetForegroundColour("#3f4043")
 
+        # Initialize Code static text on panel (Set as hidden until gotten code from server)
         self.code = wx.StaticText(self, -1, label="None")
         codefont = wx.Font(150, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         self.code.SetForegroundColour("#000000")
         self.code.SetFont(codefont)
         self.code.Hide()
 
+        # Initialize static Bitmap button of copying code to clipboard, bind to hover and clicking events
         self.copy_code_bitmap = wx.Bitmap("copy_code.png")
         self.copy_code_hover_bitmap = wx.Bitmap("copy_code_hover.png")
         self.copy_code = wx.StaticBitmap(self, -1, self.copy_code_bitmap)
         self.copy_code.Bind(wx.EVT_ENTER_WINDOW, self.on_hover)
         self.copy_code.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave)
-        self.copy_code.Bind(wx.EVT_LEFT_DOWN, self.handle_copied)  # Bind left click event
-        # Add to sizer
+        self.copy_code.Bind(wx.EVT_LEFT_DOWN, self.handle_copied)
+
+        # Add all elements to sizer
         sizer.Add(title, 0, wx.CENTER | wx.TOP, 5)
         sizer.AddSpacer(50)
         sizer.Add(yourcode, 0, wx.CENTER | wx.TOP, 5)
@@ -846,7 +856,7 @@ class HelperPanel(wx.Panel):
         sizer.AddSpacer(100)
         sizer.Add(self.copy_code, 0, wx.CENTER, 5)
 
-        # Add logo at the bottom right
+        # Add logo at the bottom right of panel
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
 
         # Arrange the screen
@@ -858,27 +868,48 @@ class HelperPanel(wx.Panel):
         pub.subscribe(self.handle_connecting_session, "connecting_session")
 
     def handle_code_gotten(self, ans):
+        """
+        Function called when gotten code request answer from server, act accordingly
+        (ask user if wants new code or show code)
+        :param ans: answer to code request (code or expired code opcode)
+        """
+
+        # answer gotten is either expired code opcode ot just the code gotten
         if ans == "2":
             result = wx.MessageDialog(None, "Your code expired!\nWould you like a new code?", "Code Expiration",
                                       wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-            # Check the user's response
+            # Check the user's response to expired code message, if wants new code send a new request
+            # if not take user back to select screen
             if result == wx.YES:
                 self.frame.client.send("03")
             else:
                 self.parent.change_screen(self, self.parent.select)
         else:
-            self.session_code = ans
-            self.code.SetLabel(self.session_code)
+            # set session code element as code gotten and show code
+            self.code.SetLabel(ans)
             self.code.Show()
             self.Layout()
 
     def on_hover(self, event):
-        self.copy_code.SetBitmap(wx.Bitmap("copy_code_hover.png"))
+        """
+        Function called when button hovered on, change bitmap of button accordingly to hover bitmap
+        :param event: event of button of hover
+        """
+        self.copy_code.SetBitmap(self.copy_code_hover_bitmap)
 
     def on_leave(self, event):
-        self.copy_code.SetBitmap(wx.Bitmap("copy_code.png"))
+        """
+        Function called when button not hovered on, change bitmap of button accordingly to regular bitmap
+        :param event: event of button of hover
+        """
+        self.copy_code.SetBitmap(self.copy_code_bitmap)
 
     def handle_copied(self, event):
+        """
+        Function called when copy button is pressed, change bitmap of button,
+         disable button and copy code of session to clipboard
+        :param event: event of button press
+        """
         self.copy_code.SetBitmap(wx.Bitmap("copied.png"))
         # copy Code to clipboard
         pyperclip.copy(self.code.GetLabel())
@@ -889,38 +920,52 @@ class HelperPanel(wx.Panel):
         self.copy_code.Unbind(wx.EVT_LEFT_DOWN)
 
     def handle_connecting_session(self):
+        """
+        Function is called from client logic when other user connected to session, switch to connecting screen panel
+        and start the animation of dots
+        """
         self.parent.change_screen(self, self.parent.connecting)
         self.parent.connecting.start_dots_animation()
 
 
 class ASPanel(wx.Panel):
     def __init__(self, parent, frame):
+        """
+        Helper user panel
+        :param parent: Parent panel
+        :param frame: frame parent
+        """
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
         self.SetBackgroundColour("#fdf0d0")
+
         sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # Initialize title on panel
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
         title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
+
+        # Initialize enter code text on panel
         enter = wx.StaticText(self, -1, label="Enter Session Code")
         enterfont = wx.Font(75, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Garamond")
         enter.SetForegroundColour("#3f4043")
         enter.SetFont(enterfont)
 
-        # textctrl to enter code
+        # Initialize textctrl to enter code on panel, bind to text changing event
         self.codeField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(800, -1))
         codefont = wx.Font(90, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT")
         self.codeField.SetFont(codefont)
         self.codeField.Bind(wx.EVT_TEXT, self.on_text_change)
 
-        # connect acting as a button
+        # Initialize static bitmap button to connect to session, bind to click event
         self.connect = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap("connect_off.png"))
         self.connect.Bind(wx.EVT_LEFT_DOWN, self.on_connect)
         self.can_press = False
 
-        # add all elements to sizer
+        # Add all elements to sizer
         sizer.Add(title, 0, wx.CENTER | wx.TOP, 5)
         sizer.AddSpacer(75)
         sizer.Add(enter, 0, wx.CENTER | wx.TOP, 5)
@@ -929,18 +974,23 @@ class ASPanel(wx.Panel):
         sizer.AddSpacer(180)
         sizer.Add(self.connect, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
 
-        # Add logo at the bottom right
+        # Add logo at the bottom right of panel
         wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
 
-        self.invalidText = None
         # arrange the screen
         self.SetSizer(sizer)
+        self.invalidText = None
         self.Layout()
         self.Hide()
 
         pub.subscribe(self.handle_code_ans, "code_ans")
 
     def handle_code_ans(self, ans):
+        """
+        Function called when gotten code entered answer from server, act accordingly
+        (switch to connecting session panel or show invalid message)
+        :param ans: answer to code entered (code valid or invalid)
+        """
         if ans:
             self.parent.change_screen(self, self.parent.connecting)
             self.parent.connecting.start_dots_animation()
@@ -948,7 +998,13 @@ class ASPanel(wx.Panel):
             self.show_invalid_message("Session code incorrect", 2000)
 
     def on_text_change(self, event):
+        """
+        Function called when text in textctrl changes, checks if text is empty or isn't and changes bitmap of button and
+         can_press boolean value accordingly
+        :param event: event of textctrl value change
+        """
         text = self.codeField.GetValue()
+
         if text != "":
             if not self.can_press:
                 self.connect.SetBitmap(wx.Bitmap("connect.png"))
@@ -958,32 +1014,49 @@ class ASPanel(wx.Panel):
             self.can_press = False
 
     def on_connect(self, event):
+        """
+        Function called when connect button is pressed, check if boolean value of can_press is True
+         and send code in textctrl field by protocol to server
+        :param event: event of connect button pressed
+        """
         code_in_text = self.codeField.GetValue()
+
         if self.can_press:
             msg2send = Client_protocol.pack_code(code_in_text)
             self.frame.client.send(msg2send)
 
     def show_invalid_message(self, msg, time):
-
-        # Show red text message for 5 seconds
+        """
+        Function shows invalid message on screen for certain time
+        :param msg: msg to show on screen
+        :param time: amount of time to show message on screen
+        """
+        # Set invalid text as msg gotten
         self.invalidText = wx.StaticText(self, label=msg, style=wx.ALIGN_CENTER)
         self.invalidText.SetFont(wx.Font(35, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Calisto MT"))
         self.invalidText.SetForegroundColour(wx.RED)
 
+        # place invalid text in right position in sizer
         sizer = self.GetSizer()
         sizer.Insert(sizer.GetItemCount(), self.invalidText, 0, wx.ALIGN_TOP | wx.CENTER, 10)
 
+        # Disable interactive elements
         self.codeField.Disable()
         self.can_press = False
         self.connect.SetBitmap(wx.Bitmap("connect_off.png"))
         self.Layout()
 
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
-        self.timer.Start(time, oneShot=True)
+        timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
+        # start timer for certain time gotten
+        timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
-        # Remove the invalid message after certain time
+        """
+        Function called when timer ends and erases invalid text currently seen
+        :param event: event for time
+        """
+        # Remove the invalid message if still exists and enable button and textctrl back
         if self.invalidText is not None:
             self.invalidText.Destroy()
             self.Layout()
@@ -994,66 +1067,81 @@ class ASPanel(wx.Panel):
 
 class ConnectingPanel(wx.Panel):
     def __init__(self, parent, frame):
+        """
+        Connecting to session panel
+        :param parent: Parent panel
+        :param frame: frame parent
+        """
         wx.Panel.__init__(self, parent, pos=wx.DefaultPosition, style=wx.SIMPLE_BORDER, size=(1920, 1080))
         self.frame = frame
         self.parent = parent
         self.SetBackgroundColour("#fdf0d0")
+
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
+        # Initialize title on panel
         title = wx.StaticText(self, -1, label="UELP")
         titlefont = wx.Font(68, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Algerian")
         title.SetForegroundColour("#aa7c57")
         title.SetFont(titlefont)
 
+        # Initialize connecting to session text on panel
         self.connecting_text = wx.StaticText(self, -1, label="Connecting to session")
         connecting_font = wx.Font(90, wx.DECORATIVE, wx.NORMAL, wx.NORMAL, False, "Garamond")
         self.connecting_text.SetForegroundColour("#3f4043")
         self.connecting_text.SetFont(connecting_font)
 
-        self.disconnect_instruction = wx.StaticText(self, -1,
-                                                    label="To disconnect from session press: Ctrl + Shift + D")
+        # Initialize disconnect from session instructions on panel
+        disconnect_instruction = wx.StaticText(self, -1,
+                                               label="To disconnect from session press: Ctrl + Shift + D")
         disconnect_font = wx.Font(25, wx.DECORATIVE, wx.NORMAL, wx.NORMAL, False, "Garamond")
-        self.disconnect_instruction.SetForegroundColour("#880808")
-        self.disconnect_instruction.SetFont(disconnect_font)
+        disconnect_instruction.SetForegroundColour("#880808")
+        disconnect_instruction.SetFont(disconnect_font)
 
-        # Add connecting text to center vertically
+        # Add elements to sizer
         self.sizer.Add(title, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP, 5)
         self.sizer.AddStretchSpacer()
         self.sizer.Add(self.connecting_text, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.TOP, 5)
-
-        # Add a spacer to push disconnect instruction closer to the bottom
         self.sizer.AddStretchSpacer()
+        self.sizer.Add(disconnect_instruction, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, 20)
 
-        # Add disconnect instruction just above the logo and in the middle
-        self.sizer.Add(self.disconnect_instruction, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, 20)
-
-        # Add logo at the bottom right
-        self.logo = wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"))
-        # Add a flexible space to push the logo to the bottom-right
-        self.sizer.Add(self.logo, 0, wx.ALIGN_RIGHT | wx.ALIGN_BOTTOM | wx.ALL, 5)
+        # Add logo at the bottom right of panel
+        wx.StaticBitmap(self, -1, wx.Bitmap("logo.png"), pos=(1680, 920))
 
         # arrange the screen
         self.SetSizer(self.sizer)
         self.Layout()
         self.Hide()
 
+        # Initialize timer for dot animation
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer)
         self.dots_counter = 0
 
     def on_timer(self, event):
+        """
+        Function called when timer ends, add dot to end of connecting text dynamically
+        :param event: event of timer ending
+        """
         text = self.connecting_text.GetLabel()
+
+        # if text already has three dots start new set of dots and update the dot set counter otherwise add dot to text
         if text.endswith("..."):
             self.connecting_text.SetLabel("Connecting to session")
             self.dots_counter += 1
         else:
             self.connecting_text.SetLabel(text + ".")
 
-        if self.dots_counter >= 3:  # Stop after reaching 3 sets of 3 dots
+        # Stop after reaching 3 sets of 3 dots and close connecting frame as user is connecting to session
+        if self.dots_counter == 3:
             self.timer.Stop()
             self.parent.frame.Close()
 
     def start_dots_animation(self):
+        """
+        Function called to start dot animation (new dot every half second)
+        :return:
+        """
         self.timer.Start(500)
 
 
