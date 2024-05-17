@@ -1,8 +1,9 @@
-from Monitor_Mouse import Mouse_monitor
-from Servercomm import Server_comm
-from Monitor_Keyboard import Keyboard_monitor
 import queue
 import threading
+
+from Monitor_Keyboard import Keyboard_monitor
+from Monitor_Mouse import Mouse_monitor
+from Servercomm import Server_comm
 
 
 def check(check_queue, listener):

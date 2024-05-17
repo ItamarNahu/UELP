@@ -1,8 +1,10 @@
 import queue
-from Servercomm import Server_comm
-from PIL import Image
-import pygame
 import zlib
+
+import pygame
+from PIL import Image
+
+from Servercomm import Server_comm
 
 # global current PIL image on screen
 currScreen = None
@@ -30,7 +32,7 @@ def build_Screen(top: int, left: int, right: int, bottom: int, img_bytes: bytes)
 def main_Helper_screen(otherIP):
     """
     Main Helper screen, get images from Assistance Seeker client and paste
-     the images based on if are difference or full Images accordingly
+    the images based on if are difference or full Images accordingly
     :param otherIP: ip of Assistance Seeker client getting images from
     """
     recv_q = queue.Queue()

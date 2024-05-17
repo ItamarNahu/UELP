@@ -1,18 +1,20 @@
-import Client_protocol as Protocol
+import multiprocessing
 import queue
 import threading
-from clientComm import Client_comm
+import time
 from uuid import getnode
+
 import wx
-import graphics
 from pubsub import pub
-import multiprocessing
-import Helper_logic
-import Helper_screen_logic
+
 import AssistanceSeeker_keyboard_logic
 import AssistanceSeeker_mouse_logic
 import AssistanceSeeker_screen_logic
-import time
+import Client_protocol as Protocol
+import Helper_logic
+import Helper_screen_logic
+import graphics
+from clientComm import Client_comm
 
 
 def handleMsgs(client, recv_q):
@@ -91,7 +93,7 @@ def handle_code_ans(params):
 def handle_conData(params):
     """
     Function gets connection data of other user to connect too and starts process for mouse keyboard and screen
-     accordingly to user type
+    accordingly to user type
     :param params: list of all parameters unpacked and gotten from data from server
     """
     otherIP = params[0]
@@ -147,7 +149,7 @@ def check_closed(close_queue, mouse, screen, keyboard):
 
 
 if __name__ == '__main__':
-    ip = "192.168.4.77"
+    ip = "10.0.0.38"
     port = 2000
     recv_q = queue.Queue()
     client = Client_comm(ip, port, recv_q)

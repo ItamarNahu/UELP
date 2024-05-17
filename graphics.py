@@ -1,8 +1,10 @@
 import re
+
 import pyperclip
 import wx
 import wx.adv
 from pubsub import pub
+
 import Client_protocol
 
 
@@ -146,9 +148,9 @@ class LoginPanel(wx.Panel):
         self.signup.SetForegroundColour("#0000FF")
 
         # add all text to signup sizer
-        signup_sizer.Add(no_account, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        signup_sizer.Add(no_account, 0, wx.ALL, 5)
         signup_sizer.AddSpacer(8)
-        signup_sizer.Add(self.signup, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        signup_sizer.Add(self.signup, 0, wx.ALL, 5)
 
         # create list of all interactive elemnts to disable/enable when needed
         self.interactive_elements = [self.nameField, self.passField, self.next]
@@ -432,9 +434,9 @@ class SignUpPanel(wx.Panel):
         self.login.SetForegroundColour("#0000FF")
 
         # add elements to sizer
-        signin_sizer.Add(have_account, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        signin_sizer.Add(have_account, 0, wx.ALL, 5)
         signin_sizer.AddSpacer(8)
-        signin_sizer.Add(self.login, 0, wx.ALIGN_CENTER_HORIZONTAL, 5)
+        signin_sizer.Add(self.login, 0, wx.ALL, 5)
 
         # create list of all interactive elemnts to disable/enable when needed
         self.interactive_elements = [self.nameField, self.passField, self.next]

@@ -1,8 +1,10 @@
+import time
+
 import keyboard as Keyboard
 from pynput import keyboard
 from pynput.keyboard import Key
+
 import Helper_protocol
-import time
 
 
 # class to monitor keyboard
@@ -62,6 +64,7 @@ class Keyboard_monitor:
                                      Key.left: 1114155,
                                      Key.right: 1114156}
         self.close_queue = close_queue
+        self.listener = None
         self._monitor_keyboard()
 
     def pressed_end(self):

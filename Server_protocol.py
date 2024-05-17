@@ -75,6 +75,7 @@ def pack_con_data(ip: str, userType: str) -> str:
     """
     function packs connection data msg based on the protocol
     :param ip: ip to send
+    :param userType: user type of client sending connection data too
     :return: packed data based on protocol
     """
     return "05" + str(len(ip)).zfill(2) + ip + userType

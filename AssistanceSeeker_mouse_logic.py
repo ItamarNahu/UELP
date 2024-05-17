@@ -1,6 +1,8 @@
-from clientComm import Client_comm
 import queue
+
 from pynput import mouse
+
+from clientComm import Client_comm
 
 
 def main_AS_mouse(otherIP):

@@ -15,8 +15,8 @@ def unpackData(data: str) -> str and list:
         params.append(data[2:])
     elif opcode == "05":
         ip_len = data[2:4]
-        params.append(data[4:4+int(ip_len)])
-        params.append(data[4+int(ip_len):])
+        params.append(data[4:4 + int(ip_len)])
+        params.append(data[4 + int(ip_len):])
 
     return opcode, params
 

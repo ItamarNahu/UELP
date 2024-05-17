@@ -1,10 +1,12 @@
-from clientComm import Client_comm
 import queue
-from pynput import keyboard
-import keyboard as Keyboard
 import threading
+
+import keyboard as Keyboard
+from pynput import keyboard
 from pynput.keyboard import Key
+
 import AssistanceSeeker_protocol as protocol
+from clientComm import Client_comm
 
 
 def check_close(close_queue, client):

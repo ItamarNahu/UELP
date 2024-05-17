@@ -1,9 +1,11 @@
 import queue
-from clientComm import Client_comm
-from PIL import ImageChops, ImageGrab
-import AssistanceSeeker_protocol
 import zlib
+
 import pygame
+from PIL import ImageChops, ImageGrab
+
+import AssistanceSeeker_protocol
+from clientComm import Client_comm
 
 
 def getChanged(newScreen: ImageGrab, currScreen: ImageGrab):
@@ -67,6 +69,7 @@ def main_AS_screen(otherIP):
     # wait for client to finish key exchange then send the first image
     while not client.exchangeStatus():
         pass
+
     # send first screenshot to Helper based on protocol
     client.sendImage(AssistanceSeeker_protocol.pack_full_image(str(len(currScreen_bytes))), currScreen_bytes)
 

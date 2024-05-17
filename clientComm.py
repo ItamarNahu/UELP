@@ -1,8 +1,9 @@
-import socket
-import threading
-import sys
-import secrets
 import base64
+import secrets
+import socket
+import sys
+import threading
+
 from AsymmetricEncryption import RSA_cipher
 from SymmetricEncryption import AES_hash_cipher
 

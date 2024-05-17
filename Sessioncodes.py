@@ -1,7 +1,7 @@
+import base64
+import secrets
 import threading
 import time
-import secrets
-import base64
 
 
 # class to work with session codes of sessions valid in server

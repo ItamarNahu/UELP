@@ -1,6 +1,8 @@
-import pynput
-from Servercomm import Server_comm
 import queue
+
+import pynput
+
+from Servercomm import Server_comm
 
 
 # class to monitor mouse
@@ -13,7 +15,7 @@ class Mouse_monitor:
         """
         self.server = server
         self.clientIP = clientIP
-        self.listener = None  # Initialize listener attribute
+        self.listener = None
 
         self._monitor_mouse()
 

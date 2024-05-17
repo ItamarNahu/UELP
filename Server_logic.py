@@ -1,10 +1,12 @@
-from Servercomm import Server_comm
-from Sessioncodes import Session_codes
-from Database import Database_comm
-import Server_protocol as Protocol
 import queue
 import threading
+
 from scapy.layers.l2 import getmacbyip
+
+import Server_protocol as Protocol
+from Database import Database_comm
+from Servercomm import Server_comm
+from Sessioncodes import Session_codes
 
 
 def handleMsgs(server, recv_q):
@@ -189,8 +191,8 @@ def handle_codeCheck(clientIP, db, server, params):
         # check if code gotten exists as a valid session code and send msg back to user accordingly
         codeAnswer = codes.checkCode(userCode)
         server.send(clientIP, Protocol.pack_code_ans(codeAnswer))
-        # check if code is valid or not and send connection data of users who connected to session back to eachother
-        # to start connectopm
+        # check if code is valid or not and send connection data of users who connected to session back to each other
+        # to start session
         if codeAnswer:
             otherIP = codes.ip_from_code(userCode)
             server.send(clientIP, Protocol.pack_con_data(otherIP, "A"))
