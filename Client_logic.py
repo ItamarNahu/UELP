@@ -149,7 +149,7 @@ def check_closed(close_queue, mouse, screen, keyboard):
 
 
 if __name__ == '__main__':
-    ip = "10.0.0.38"
+    ip = "192.168.4.76"
     port = 2000
     recv_q = queue.Queue()
     client = Client_comm(ip, port, recv_q)

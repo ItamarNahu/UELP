@@ -115,9 +115,8 @@ def main_AS_keyboard(otherIP, close_queue):
             # check if key is released or clicked and change computer keyboard accordingly
             if opcode == "01":
                 keyboard_cont.press(key)
-                print("pressed " + key)
             elif opcode == "02":
                 keyboard_cont.release(key)
-                print("released " + key)
+
         else:
             break

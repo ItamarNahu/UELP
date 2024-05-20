@@ -188,6 +188,7 @@ class LoginPanel(wx.Panel):
         if ans == "1":
             self.show_invalid_message("Username or password incorrect", 2000)
         elif ans == "2":
+            print(333)
             self.show_invalid_message("User is logged in", 2000)
         elif ans == "0":
             self.parent.change_screen(self, self.parent.select)
@@ -211,10 +212,10 @@ class LoginPanel(wx.Panel):
         self.disable_interactive_elements()
         self.Layout()
 
-        timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
         # start timer for certain time gotten
-        timer.Start(time, oneShot=True)
+        self.timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
         """
@@ -494,10 +495,10 @@ class SignUpPanel(wx.Panel):
         self.disable_interactive_elements()
         self.Layout()
 
-        timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
         # start timer for certain time gotten
-        timer.Start(time, oneShot=True)
+        self.timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
         """
@@ -790,10 +791,10 @@ class SelectUserPanel(wx.Panel):
         # set user type to be None as user type asked for was not gotten
         self.userType = None
 
-        timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
         # start timer for certain time gotten
-        timer.Start(time, oneShot=True)
+        self.timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
         """
@@ -1048,10 +1049,10 @@ class ASPanel(wx.Panel):
         self.connect.SetBitmap(wx.Bitmap("connect_off.png"))
         self.Layout()
 
-        timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, timer)
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
         # start timer for certain time gotten
-        timer.Start(time, oneShot=True)
+        self.timer.Start(time, oneShot=True)
 
     def on_timer(self, event):
         """
